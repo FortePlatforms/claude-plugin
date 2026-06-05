@@ -1,0 +1,12 @@
+{
+  "name": "forteplatforms",
+  "owner": { "name": "Forte Platforms" },
+  "description": "Forte Platforms plugins for Claude Code.",
+  "plugins": [
+    {
+      "name": "claude-plugin",
+      "source": "./",
+      "description": "Keeps Claude accurate on Forte's CLI, SDK, auth, and deployment workflows."
+    }
+  ]
+}
