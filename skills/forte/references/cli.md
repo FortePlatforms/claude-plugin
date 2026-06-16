@@ -96,6 +96,52 @@ forte services update <projectId> <serviceId> \
 
 If the update triggers a new build, the CLI prints `"A new deployment has been triggered."` The Forte dashboard shows build status and logs.
 
+`forte services list` shows `<owner>/<repo> · <branch> · <endpoint>` per service, so you can match a service to a local git repo.
+
+---
+
+## Requests
+
+Inspect a service's per-request invocation logs (status, latency, exception). Services only — websites have no request logs. See `references/debugging.md` for the full "show me recent errors" flow.
+
+```
+forte requests <projectId> <serviceId> [options]            # list (default: recent 5xx)
+forte requests get <projectId> <serviceId> <requestId>      # full detail for one request
+```
+
+| Flag | Default | Notes |
+|---|---|---|
+| `--status <codes...>` | common 5xx | Exact status code(s) to match, e.g. `--status 400 403`. The API has no status-class filter, so each code is a separate query. |
+| `--all` | — | List all requests regardless of status. |
+| `--method <method>` | — | Filter by HTTP method. |
+| `--path <path>` | — | Filter by exact request path. |
+| `--since <duration>` | `24h` | Look-back window: `30m`, `1h`, `24h`, `7d`. |
+| `--limit <n>` | `20` | Max requests to show. |
+| `--json` | — | Output raw JSON instead of a table. |
+
+`forte requests get` returns the exception type, message, and stack trace plus request/response bodies (when body logging is on). Each listed request shows its `requestId` — pass it to `forte requests get` or `forte logs --request`.
+
+---
+
+## Logs
+
+Read a service's application log lines. Services only.
+
+```
+forte logs <projectId> <serviceId> [options]                       # list recent log lines
+forte logs search <projectId> <serviceId> --search "<query>" [options]   # full-text search
+```
+
+| Flag | Default | Notes |
+|---|---|---|
+| `--request <requestId>` | — | Only log lines produced by this request (pairs with `forte requests`). |
+| `--level <level>` | — | Filter by level: `ERROR`, `WARN`, `INFO`, ... |
+| `--build <buildId>` | — | Only logs from this deployment/build. |
+| `--search <query>` | — | Full-text query (required for the `search` action). |
+| `--since <duration>` | `1h` | Look-back window: `30m`, `1h`, `24h`, `7d`. |
+| `--limit <n>` | `50` | Max log lines to show. |
+| `--json` | — | Output raw JSON instead of a table. |
+
 ---
 
 ## Proxy
