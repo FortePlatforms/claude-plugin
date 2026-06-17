@@ -49,7 +49,8 @@ const { subscription, stripeClientSecret, stripePublishableKey, stripeConnectedA
 Confirm `stripeClientSecret` with Stripe Elements exactly as for a one-off payment (see `payments.md` —
 `stripeAccount` is required). That single confirmation charges period 1 **and** saves the card. The
 subscription flips `INCOMPLETE` → `ACTIVE` automatically. `createSubscriptionPreview` is the read-only
-quote (returns totals + estimated `nextRenewalAt`).
+quote (returns totals + estimated `nextRenewalAt`); like create, it's on both surfaces
+(`forte.users.createSubscriptionPreview` / `forte.projects.createSubscriptionPreview`).
 
 ## Manage
 
