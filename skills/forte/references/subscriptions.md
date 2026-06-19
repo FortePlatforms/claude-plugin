@@ -10,7 +10,7 @@ ordinary Forte `Payment`**, so existing payment reporting and `PAYMENT_COMPLETED
 
 - Same compliance/sandbox rules as Payments (live needs `APPROVED`; sandbox bypasses). See `payments.md`.
 - **Early-access feature**: the account must have the `SUBSCRIPTIONS` feature enabled (request it from
-  `forteplatforms.com/console/subscriptions`). Until granted, `createSubscription` returns
+  `forteplatforms.com/console/payments`). Until granted, `createSubscription` returns
   `SUBSCRIPTIONS_ACCESS_REQUIRED`.
 
 ## Lifecycle
