@@ -52,6 +52,8 @@ const { subtotalCents, taxCents, amountCents } = preview;
 - Omit `customerAddress` → no tax computed, `amountCents == subtotalCents`.
 - `taxCode` is a Stripe product tax category (e.g. `txcd_99999999` general goods, `txcd_10000000`
   digital goods). Tax is always **exclusive** (added on top of the unit price).
+- Shipping charges: use `txcd_92010001`. Forte sums any lines with this code and reports the total
+  as shipping cost so tax is computed correctly (Stripe taxes shipping separately from goods).
 
 ## Create (the "Pay" click)
 
