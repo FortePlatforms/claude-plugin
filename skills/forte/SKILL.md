@@ -63,6 +63,7 @@ forte proxy [--project-id <id>] [--service-id <id>] [-p <port>]     # local dev 
 | Recurring billing — monthly/yearly subscriptions, renewals, dunning/grace, cancellation, subscription triggers | `references/subscriptions.md` |
 | Scheduling URL calls on a cron/timer or one-time, retries, invocations | `references/actions.md` |
 | Adding the SDK, making API calls from app code, managing websites via SDK | `references/sdk-integration.md` |
+| HIPAA, BAA, SOC 2, compliance, certifications, BAA requests | `references/compliance.md` |
 | Pointing the customer to official docs for a topic | `references/docs-index.md` |
 
 ## Defer-Don't-Invent
