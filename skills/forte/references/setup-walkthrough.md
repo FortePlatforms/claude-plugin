@@ -18,11 +18,13 @@ Gather context without prompting the customer:
 
 - **Git remote URL**: read `.git/config` or run `git remote get-url origin`
 - **Current branch**: run `git rev-parse --abbrev-ref HEAD`
-- **Framework / language**: check for `package.json` (Node.js/TypeScript), `requirements.txt` / `pyproject.toml` (Python), `pom.xml` / `build.gradle` (Java), etc.
+- **Framework / language**: check for `package.json` (Node.js/TypeScript), `requirements.txt` / `pyproject.toml` (Python), `pom.xml` / `build.gradle` (Java), etc. This is only to inform the **service-vs-website** decision below and the conversation — you don't need to get it exactly right, because Forte runs its own authoritative detection server-side at build time (see "How Forte builds your app" below).
 - **Service or website?** — see the decision rules below
-- **Dev server port** (for services): scan the `"dev"` or `"start"` script in `package.json` for a `--port` flag; default is `3000` for Node, `8000` for Python, `8080` for Java.
-- **Build command and output directory** (for websites): scan `package.json` `"scripts"` for the build command and check the framework's default output directory (`out/` for Next.js export, `dist/` for Vite, `build/` for Create React App, `dist/` for Astro static).
 - **Already on Forte?**: run `forte projects list` to check for existing projects.
+
+> **Don't supply or guess deployment build settings.** Forte auto-detects the listening port, health-check path, build/start commands, package manager, runtime version, and Dockerfile from the real code at build time — there is **no** "3000 for Node" deploy default. Only pass the override flags (`--health-check-port`, `--build-command`, `--output-dir`, etc.) when the customer explicitly wants to override what Forte detects. See "How Forte builds your app" below and `references/build-and-detection.md`.
+
+> The only place a `3000`/`8000`/`8080` heuristic applies is choosing where **`forte proxy`** forwards locally (your local dev server's port): pass `-p <port>` if your dev server isn't on the service's detected port. That is a *local* concern, unrelated to how Forte health-checks the deployed service.
 
 ### Service vs. Website decision
 
@@ -40,6 +42,15 @@ If the answer is ambiguous, ask the customer.
 **SSR websites bypass the Forte gateway.** A website — static *or* server-rendered — is served directly and does not pass through the gateway, so it gets **no** Forte auth enforcement, **no** `X-Forte-User-Id` header, and **no** request logs or metrics. Deploy an SSR app as a **service** when it needs Forte to authenticate or observe requests; deploy it as a **website** when it's public-by-default and you just want it hosted. See `references/auth-and-proxy.md` and [forteplatforms.com/docs/core-concepts/websites](https://forteplatforms.com/docs/core-concepts/websites).
 
 **Websites are frontend only — pair them with a service for anything privileged.** A website cannot hold `FORTE_API_TOKEN` (never injected), cannot read `X-Forte-User-Id`, and has no request logs/metrics. So any code that needs the server-side Forte API (`forte.projects.*`), authenticated request handling, or observability must live in a **service**. The recommended shape for an app with a real backend is a **website (frontend) + a service (backend)** the browser calls with the user's session token as a Bearer header. The repo's `examples/nextjs-node/` shows exactly this (a Next.js website + a Node/Express service) and its README explains why the backend can't live in the website. If you'd rather keep backend logic inside one Next.js codebase, deploy that Next.js app as a **service** (not a website) so it runs behind the gateway with full tooling.
+
+### How Forte builds your app
+
+Forte figures out how to build and run your code from the **actual repository** — you don't hand it a port, a start command, or (usually) a Dockerfile:
+
+- **Services**: Forte uses your repo's Dockerfile if it has one, otherwise it generates one from the real project signals (`package.json`/`pom.xml`/`requirements.txt`/`go.mod`/`Gemfile`/`Cargo.toml`, lockfiles, framework config, version files). It then detects the **listening port** (from the Dockerfile `EXPOSE`) and a **GET health-check route** (from the app's real routes) for the deployment health check.
+- **Websites**: Forte detects the framework, package manager (from the lockfile), Node version (`engines.node`), build command, and output directory.
+
+If Forte can't determine something with confidence, the **build fails with a specific error** (e.g. no exposed port, no health-check route found) instead of guessing — so the fix is concrete. Everything detected is **overridable** with flags and re-detectable with `--reset-*`. So when a customer asks "what port will it use?" the answer is *"the one your app actually listens on — Forte reads it from your code,"* not a per-language default. Full detail (signals, failure modes, override/reset flags): `references/build-and-detection.md`.
 
 ## Step 4 — Collect decisions
 
@@ -76,8 +87,10 @@ forte services create <projectId> \
   --repo <githubHttpsUrl> \
   --branch <branch> \
   [--env KEY=VAL ...] \
-  [--auth-exclude /health ...]
+  [--secret KEY=VAL ...]
 ```
+
+Don't pass port/health-check/Dockerfile flags here — Forte detects those from the code (see "How Forte builds your app" above). **Auth exclusions are set after creation** with `forte services update <projectId> <serviceId> --auth-exclude <antPattern> ...` (the `--auth-exclude` flag is not read on `create`).
 
 If the GitHub App is not installed, an error will mention repository access — remind the customer to install it at [github.com/apps/forte-platforms](https://github.com/apps/forte-platforms), then re-run.
 
@@ -125,7 +138,7 @@ const website = await forte.projects.createWebApp({
 // website.forteDnsEndpoint → e.g. abc123.sites.tryforte.dev
 ```
 
-Once created, the website is reachable at `https://<websiteId>.sites.tryforte.dev`. Custom domains are not yet supported.
+Once created, the website is reachable at `https://<websiteId>.sites.tryforte.dev`. To attach a custom domain, use `forte websites domains add <projectId> <websiteId> <domain>`, then `forte websites domains sync ...` to advance DNS/cert verification (see `references/cli.md`).
 
 ## Step 7 — Surface the results
 

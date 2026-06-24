@@ -236,9 +236,11 @@ npm run dev                    # starts on localhost:3000
 forte proxy \
   --project-id <id> \
   --service-id <id> \
-  -p 3000                      # your app's port
+  -p 3000                      # your local dev server's port
                                # proxy listens on localhost:8080 by default
 ```
+
+`-p/--port` is just **where your local dev server is running** so the proxy knows where to forward — it has nothing to do with how Forte health-checks the deployed service (that port is detected from your code). If you omit `-p`, the proxy forwards to the service's detected port and only falls back to `3000` if that's unknown.
 
 Point your frontend at `http://localhost:8080`. The proxy also exposes your LAN IP so a phone on the same Wi-Fi can test mobile flows.
 

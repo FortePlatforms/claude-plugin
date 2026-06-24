@@ -11,9 +11,10 @@ Forte is a deployment and end-user authentication platform. This skill keeps Cla
 
 These invariants are commonly violated — do not cross them:
 
-- **The CLI has exactly 11 commands**: `login` (alias: `auth`), `logout`, `whoami`, `projects`, `services`, `websites`, `requests`, `logs`, `actions`, `proxy`, `help`. There is **no** `forte init`, `forte deploy`, `forte build`, `forte test`, `forte web`, `forte run`. Do not invent them.
+- **The CLI has exactly 14 commands**: `login` (alias: `auth`), `logout`, `whoami`, `projects`, `services`, `websites`, `requests`, `logs`, `payments`, `payment-methods`, `payment-triggers`, `actions`, `proxy`, `help`. There is **no** `forte init`, `forte deploy`, `forte build`, `forte test`, `forte web`, `forte run`, `forte env`, `forte secrets`, or `forte databases`. Do not invent commands or flags — `references/cli.md` is the exact, complete surface (positional args, flag names, defaults). Flag names are precise: it's `--output-dir` not `--out-dir`, `--health-check-path` not `--healthcheck`, and there is **no** `--remove-env` (service env is replaced wholesale via `--env`).
 - **The CLI writes nothing to the user's repo.** No `forte.json`, no `.forterc`. IDs are CLI arguments — surface them with `forte projects list`, `forte services list <projectId>`, or `forte websites list <projectId>`.
 - **Forte projects contain three deployable resources**: services (containerized backends), websites (front-ends from GitHub, served on a CDN), and content. Services and websites are different primitives — see `references/setup-walkthrough.md` for which to recommend.
+- **Forte detects deploy config from your real code — it does not assume language defaults.** At build time Forte inspects the actual repository to determine the listening port, the health-check path, the build/start commands, the package manager, the runtime version, and whether to use the repo's Dockerfile or generate one. **Never tell a customer "Forte defaults to port 3000 for Node" (or any per-language port) for deployment.** There is no such deploy-time default: the port and health-check path come from the real Dockerfile `EXPOSE` and the app's real HTTP routes, and if Forte can't determine them with confidence the **build fails with a specific, actionable error** rather than silently guessing. (The `3000`/`8000`/`8080` numbers exist only as a last-resort local forwarding target for `forte proxy` — unrelated to deployment.) Detected values are overridable and re-detectable (services: `--health-check-port`/`--health-check-path`/`--reset-healthcheck`/`--reset-dockerfile`; websites: `--build-command`/`--output-dir`/`--package-manager`/`--node-version`/`--reset-detected-config`). See `references/build-and-detection.md`.
 - **Managed Databases (early access) are a project-level resource.** Forte offers managed **PostgreSQL** and **MongoDB** that belong to a *project* (not to a service or a signed-in user) and connect automatically and securely to the services you attach them to — Forte injects the connection string into the service as an environment variable, so nothing is wired up by hand. They are encrypted by default and HIPAA-ready, with automated backups and the ability to branch ephemeral test databases from real data. **There is no `forte databases` CLI command and no SDK database API yet** — during early access, databases are created and managed from the console only; do not tell customers to run `forte databases ...`. Customers request access from the Databases tab in the console (`/console/databases`). See `references/databases.md`.
 - **Three end-user auth methods are live**: Google OAuth, OTP (one-time passcode over email or SMS), and password sign-in. Password and per-channel OTP login are toggled on in project settings. See `references/auth-and-proxy.md`.
 - **Sandbox (test) mode exists** as a project-level flag set **at creation time** — it is permanent and immutable (a project can't switch between live and sandbox). It unlocks hard-delete, contact-method overrides, default body logging, and Stripe test-mode payments. For *local* testing of a live service, use `forte proxy` (services only — websites are public-by-default and don't go through Forte auth). Multiple environments = multiple projects. See `references/api-surfaces.md`.
@@ -46,8 +47,13 @@ forte actions create <projectId> --name <n> --service <serviceId> --path </p> --
 forte actions create <projectId> --name <n> --service <serviceId> --path </p> --schedule one-time --at <iso8601>
 forte actions invoke <projectId> <actionId>                          # run once on demand
 forte actions invocations <projectId> <actionId>                     # list past invocations
+forte payments list <projectId> <userId>                             # list a user's payments (beta)
+forte payment-methods list <projectId> <userId>                      # list a user's saved cards (beta)
+forte payment-triggers list <projectId>                              # list payment-event webhooks (beta)
 forte proxy [--project-id <id>] [--service-id <id>] [-p <port>]     # local dev proxy (services only)
 ```
+
+Omitting a required `projectId` / `serviceId` / `websiteId` / `userId` drops into an interactive picker. `references/cli.md` is the complete, exact command + flag surface — consult it before using any flag.
 
 ## When to Read Which Reference
 
@@ -56,6 +62,7 @@ forte proxy [--project-id <id>] [--service-id <id>] [-p <port>]     # local dev 
 | Installing the CLI, login errors, credential issues | `references/cli.md` |
 | "Show me recent errors" / "debug a failing request" / pulling request or application logs for a service | `references/debugging.md` |
 | "Set up Forte for my app" / "deploy this" / creating projects, services, or websites | `references/setup-walkthrough.md` |
+| How Forte builds/detects an app — port, health-check, Dockerfile, build command, framework; build-detection failures; "what port will it use?" | `references/build-and-detection.md` |
 | Managed databases — Postgres/Mongo, attaching to services, ephemeral test data (early access) | `references/databases.md` |
 | "How does auth work", "how do sessions work", "proxy not working", OTP / password login | `references/auth-and-proxy.md` |
 | Client-side vs server-side API, where `FORTE_API_TOKEN` is safe, sandbox/test mode | `references/api-surfaces.md` |
