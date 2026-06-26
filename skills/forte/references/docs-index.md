@@ -21,7 +21,8 @@ Use this to find the right link to give a customer when their question isn't ful
 | User administration | `users/administration` | Active/Suspended/Deleted states, audit trail |
 | Deploying services | `guides/deploying-services` | Full build pipeline, Dockerfile auto-detection, build timeout, GitHub status |
 | Deploying websites | `guides/deploying-websites` | Step-by-step website deploy flow, framework auto-detection, build configuration overrides |
-| Creating payments | `guides/creating-payments` | Preview vs create, Stripe Elements, refunds, payment triggers, compliance |
+| Creating payments | `guides/creating-payments` | Preview vs create, choosing methods (card/ACH), Stripe Elements, off-session charges, refunds, payment triggers, compliance |
+| ACH direct debit | `guides/ach-direct-debit` | Accept bank-account payments, instant vs microdeposit verification, async settlement & states, saving a bank account, off-session charges |
 | Creating actions | `guides/creating-actions` | Registering a scheduled/one-time URL call, testing with invoke-now, viewing invocations (beta) |
 | Local proxy testing | `guides/testing-locally` | `forte proxy` setup, LAN testing on mobile (services only) |
 | Monitoring | `guides/monitoring` | Log viewing and metrics from the Forte dashboard |

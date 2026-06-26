@@ -78,6 +78,28 @@ const { payment, stripeClientSecret, stripePublishableKey, stripeConnectedAccoun
 
 The `payment` object includes `id`, `state` (starts `DRAFT`), `amountCents`, `stripePaymentIntentId`.
 
+## Payment methods (card vs. ACH) & off-session charges
+
+- A payment accepts **cards only** by default. To offer ACH bank debit, pass
+  `supportedPaymentMethods: ["CREDIT_CARD", "ACH_DIRECT_DEBIT"]` on `createPayment`. ACH requires
+  `currency: "usd"` (else `PAYMENT_ACH_REQUIRES_USD`). Apple Pay / Google Pay ride on the card rail
+  automatically — they aren't separate values. The field is ignored when `paymentMethodId` is pinned.
+- **ACH settles asynchronously**: the payment sits in `PROCESSING` for several business days
+  (including bank verification — instant bank-link, or a microdeposit fallback Stripe handles via an
+  emailed hosted page) before `COMPLETED`/`FAILED`. Forte never cancels a `PROCESSING` payment; only
+  unconfirmed `DRAFT` is swept. React to triggers, not the create response — don't grant access on
+  `PROCESSING`.
+- **Off-session (server-initiated) one-off charge**: pass `offSession: true` + a saved
+  `paymentMethodId` to charge with no customer present (requires `paymentMethodId`, else
+  `PAYMENT_OFF_SESSION_METHOD_REQUIRED`). Cards complete/decline synchronously (decline →
+  `PAYMENT_DECLINED`); ACH returns `PROCESSING` and resolves via webhook. For recurring billing use
+  Subscriptions (card-only), not a timer.
+- **Saving a bank account**: the setup ("Add payment method") flow saves a `us_bank_account` the same
+  way as a card; it lists with `type: "us_bank_account"`, `bankName`, `last4`, `accountType`. Charge
+  it on-session (pinned) or off-session once verified.
+
+Canonical doc: [forteplatforms.com/docs/guides/ach-direct-debit](https://forteplatforms.com/docs/guides/ach-direct-debit)
+
 ## Confirm in the browser with Stripe Elements
 
 Pass the three Stripe identifiers from the response straight to your frontend. **`stripeAccount` is
@@ -131,8 +153,9 @@ payments are refundable (`PAYMENT_NOT_REFUNDABLE` otherwise; `PAYMENT_ALREADY_RE
 When a payment changes state, Forte POSTs to one of your Forte Services over a private network. Use
 it for fulfillment side effects (licenses, receipts, ledger writes).
 
-- Events: `PAYMENT_COMPLETED`, and `PAYMENT_REFUNDED` — the latter **only** for refunds/chargebacks
-  Forte detects via Stripe (e.g. a Stripe-dashboard refund or a lost dispute), **not** for refunds you
+- Events: `PAYMENT_COMPLETED`; `PAYMENT_FAILED` (terminal failure — chiefly an async ACH bounce days
+  after `PROCESSING`); and `PAYMENT_REFUNDED` — the latter **only** for refunds/chargebacks Forte
+  detects via Stripe (e.g. a Stripe-dashboard refund or a lost dispute), **not** for refunds you
   initiate via `refundPayment`.
 - Configured per project in the console (Project settings).
 - Each delivery sends headers `Content-Type: application/json` and `X-Forte-Trusted: 1`, with body

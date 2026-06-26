@@ -13,6 +13,9 @@ Forte sets the `Forte-User-Session-Token` cookie on success. **Never** call them
 `FORTE_API_TOKEN` (see `api-surfaces.md`). OTP and password login are enabled per project in settings
 (`emailLoginEnabled` / `phoneLoginEnabled` for OTP; a Password-login toggle with strength rules).
 
+On top of any first factor, a project can require **[multi-factor authentication](#multi-factor-authentication)** —
+an optional second factor configured per project.
+
 ### Google OAuth
 
 **Setup checklist:**
@@ -123,9 +126,33 @@ Canonical docs: [authentication](https://forteplatforms.com/docs/users/authentic
 
 ---
 
+## Multi-Factor Authentication
+
+MFA adds a **second factor** on top of any first factor (Google / OTP / password), configured **per project**
+(`mfaConfig`: an enforcement mode `DISABLED` / `OPTIONAL` / `REQUIRED`, plus toggles for TOTP, email OTP, SMS OTP,
+and WebAuthn). Projects with MFA off behave exactly as before.
+
+- Every first-factor login response (`googleAuthLoginCallback`, `registerUser`, `completeOtpLogin`, `passwordLogin`,
+  password reset) now carries an optional **`mfaStatus`**: `SATISFIED` (full session), `CHALLENGE_REQUIRED`, or
+  `ENROLLMENT_REQUIRED`. The latter two return a **short-lived pending token** that only works on the MFA endpoints +
+  logout and is rejected everywhere else (including the deployed app) with `401 MFA_REQUIRED`. It is not renewable.
+- Branch on `mfaStatus`. For email/SMS OTP and WebAuthn, call `forte.users.sendMfaChallenge({ type })` then
+  `forte.users.verifyMfa({ type, code | webAuthnAssertion })`; for authenticator-app (TOTP) and backup codes call
+  `verifyMfa` directly. On success Forte swaps the pending token for a full session.
+- **Factors**: authenticator app (TOTP), passkeys/security keys (WebAuthn — Forte is the relying party; a credential is
+  bound to the exact host it was registered on, so it only works on that domain), email/SMS OTP (ride the user's
+  verified contact), and one-time **backup codes** (`generateBackupCodes`, shown once).
+- **Enroll**: `createMfaMethod({ type })` → `activateMfaMethod` (TOTP code or WebAuthn attestation). Manage with
+  `listMfaMethods` / `renameMfaMethod` / `deleteMfaMethod`. Admin reset (`adminResetUserMfa`) is **sandbox-only**.
+
+Canonical doc: [forteplatforms.com/docs/users/mfa](https://forteplatforms.com/docs/users/mfa)
+
 ## Sessions
 
-Session tokens are opaque (cannot be decoded) and valid for **365 days** by default.
+Session tokens are opaque (cannot be decoded) and valid for **365 days** by default. A project with MFA enabled may
+instead return a **pending** session token from a first-factor login (`mfaStatus` ≠ `SATISFIED`): short-lived (~10 min),
+usable only on the MFA endpoints + logout, rejected elsewhere with `401 MFA_REQUIRED`, and not renewable. See
+[Multi-Factor Authentication](#multi-factor-authentication).
 
 **Passing the token**: Forte automatically sets a `Forte-User-Session-Token` cookie. You can also pass it as a header: `Authorization: Bearer <sessionToken>`.
 

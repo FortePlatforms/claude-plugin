@@ -6,6 +6,10 @@ one-off payment); Forte saves the card on the first charge, re-charges it off-se
 retries failures during a grace period, and keeps you in sync via triggers. **Every renewal is an
 ordinary Forte `Payment`**, so existing payment reporting and `PAYMENT_COMPLETED` triggers just work.
 
+Subscriptions are **card-only** — ACH direct debit settles over several business days, which doesn't
+fit a fixed renewal-and-grace schedule, so use ACH for one-off payments (`references/payments.md`), not
+recurring billing.
+
 ## Prerequisites
 
 - Same compliance/sandbox rules as Payments (live needs `APPROVED`; sandbox bypasses). See `payments.md`.
