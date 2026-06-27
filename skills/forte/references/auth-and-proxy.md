@@ -138,7 +138,10 @@ and WebAuthn). Projects with MFA off behave exactly as before.
   logout and is rejected everywhere else (including the deployed app) with `401 MFA_REQUIRED`. It is not renewable.
 - Branch on `mfaStatus`. For email/SMS OTP and WebAuthn, call `forte.users.sendMfaChallenge({ type })` then
   `forte.users.verifyMfa({ type, code | webAuthnAssertion })`; for authenticator-app (TOTP) and backup codes call
-  `verifyMfa` directly. On success Forte swaps the pending token for a full session.
+  `verifyMfa` directly. On success Forte swaps the pending token for a full session. Browser clients ride the
+  `Forte-User-Session-Token` cookie automatically; non-cookie clients (mobile/BFF) read the pending token from the
+  login response (`login.sessionToken.sessionToken`) and pass it as the `authorization` argument on each MFA call
+  (`sendMfaChallenge`, `verifyMfa`, enrollment), the same way `renewSessionToken`/`logout` take it.
 - **Factors**: authenticator app (TOTP), passkeys/security keys (WebAuthn — Forte is the relying party; a credential is
   bound to the exact host it was registered on, so it only works on that domain), email/SMS OTP (ride the user's
   verified contact), and one-time **backup codes** (`generateBackupCodes`, shown once).
