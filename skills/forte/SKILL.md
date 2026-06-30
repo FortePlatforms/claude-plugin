@@ -59,7 +59,7 @@ Omitting a required `projectId` / `serviceId` / `websiteId` / `userId` drops int
 
 | Situation | Reference |
 |---|---|
-| Installing the CLI, login errors, credential issues | `references/cli.md` |
+| Installing the CLI, login errors, credential issues, a `TERMS_OF_SERVICE_NOT_ACCEPTED` 403 | `references/cli.md` |
 | "Show me recent errors" / "debug a failing request" / pulling request or application logs for a service | `references/debugging.md` |
 | "Set up Forte for my app" / "deploy this" / creating projects, services, or websites | `references/setup-walkthrough.md` |
 | How Forte builds/detects an app — port, health-check, Dockerfile, build command, framework; build-detection failures; "what port will it use?" | `references/build-and-detection.md` |

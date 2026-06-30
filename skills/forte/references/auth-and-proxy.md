@@ -107,7 +107,7 @@ const result = await forte.users.passwordLogin({
   passwordLoginRequest: { contactValue: "alice@example.com", password: "..." },
 });
 
-// Self-service change (revokes the user's other sessions; omit currentPassword on first set)
+// Self-service change (revokes the user's other sessions; currentPassword optional for a signed-in user, validated if provided)
 await forte.users.changePassword({ projectId, changePasswordRequest: { currentPassword, newPassword } });
 
 // Reset: request always returns 204 (anti-enumeration). Two project modes:

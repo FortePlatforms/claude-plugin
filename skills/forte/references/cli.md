@@ -44,6 +44,10 @@ Full install guide: [forteplatforms.com/docs/getting-started/installation](https
 | `forte logout` | none | Removes stored credentials. |
 | `forte whoami` | none | Prints the authenticated account ID. Useful to verify auth is working. |
 
+### Terms of Service acceptance
+
+Every Forte account must accept the Terms of Service before it can use the API. Accounts normally accept them on first sign-in to the console. An account created **during `forte login`** can reach the CLI without that step — so its first real command (for example `forte projects list`) fails with **HTTP 403, error code `TERMS_OF_SERVICE_NOT_ACCEPTED`**. This is not a permissions or "not logged in" problem. The CLI prints a clear message and opens the console so the account can review and accept the terms; once accepted, re-run the command. Re-running `forte login` also surfaces the terms step in the browser.
+
 ---
 
 ## Projects
@@ -363,4 +367,5 @@ forte actions create <projectId> --name one-shot --service <serviceId> --path /j
 | Wrong build command or output dir on a website | Auto-detection picked the wrong framework setup | Override with `--build-command` / `--output-dir` (or `--reset-detected-config` to re-detect). |
 | Proxy fails to start | Port 8080 already in use | Use `--proxy-port 8081` (also auto-retries up to 5 times) |
 | `forte whoami` fails or auth errors | Missing or expired credentials | Run `forte login` |
+| A `forte` command fails with `TERMS_OF_SERVICE_NOT_ACCEPTED` (HTTP 403) | The account hasn't accepted the Forte Terms of Service — common when the account was created during `forte login` | Accept the terms in the console (the CLI opens it for you), then re-run the command — or re-run `forte login`. |
 | `--branch` required error | `--trigger push` needs a branch | Add `--branch <branch>` |
