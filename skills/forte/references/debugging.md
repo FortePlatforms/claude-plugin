@@ -56,6 +56,12 @@ Useful flags: `--since 30m|1h|24h|7d` (default `24h`), `--method`, `--path`, `--
 (default 20), `--json`. Use `--json` so you can read `requestId`, `statusCode`, latency, and
 `exceptionType` reliably.
 
+**Clients get a 503 with error code `SERVICE_PAUSED` but `forte requests` shows nothing:** the
+service is paused — Forte rejects the request before it reaches the service, so no request log is
+written. `forte services get <projectId> <serviceId>` shows a `Paused` row (the console service
+page shows a "Paused" badge). Resume the service from the console service page, or trigger a new
+deployment — deploys auto-resume a paused service — then re-test.
+
 ## 4. Drill into one failing request
 
 Each request log carries the request id. Get the full record (exception type/message/stack
