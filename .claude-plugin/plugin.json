@@ -1,5 +1,5 @@
 {
-  "name": "claude-plugin",
+  "name": "forte",
   "description": "Keeps Claude accurate on Forte's CLI, SDK, auth, and deployment workflows.",
   "author": { "name": "Forte Platforms" },
   "homepage": "https://forteplatforms.com"
