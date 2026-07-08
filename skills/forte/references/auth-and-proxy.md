@@ -91,6 +91,9 @@ Notes:
 - Resend within 60s → `429 VERIFICATION_CODE_RATE_LIMITED`.
 - **SMS compliance:** your UI must show "By continuing, you agree to receive a one-time passcode via
   SMS" before sending an SMS OTP.
+- **Sandbox fixed OTPs:** in sandbox projects, a contact method can carry a fixed test code (see
+  "Fixed Test OTP Codes (sandbox)" below). Login OTPs for that contact then use the fixed code and
+  nothing is delivered — the flow above is otherwise identical.
 
 ### Password Login
 
@@ -149,6 +152,9 @@ and WebAuthn). Projects with MFA off behave exactly as before.
   verified contact), and one-time **backup codes** (`generateBackupCodes`, shown once).
 - **Enroll**: `createMfaMethod({ type })` → `activateMfaMethod` (TOTP code or WebAuthn attestation). Manage with
   `listMfaMethods` / `renameMfaMethod` / `deleteMfaMethod`. Admin reset (`adminResetUserMfa`) is **sandbox-only**.
+- **Testing in sandbox**: a contact method with a fixed test OTP (see "Fixed Test OTP Codes (sandbox)" below) uses
+  that code for email/SMS MFA challenges too — `sendMfaChallenge` delivers nothing and `verifyMfa` accepts the
+  fixed code.
 
 Canonical doc: [forteplatforms.com/docs/users/mfa](https://forteplatforms.com/docs/users/mfa)
 
@@ -303,6 +309,17 @@ Canonical guide: [forteplatforms.com/docs/guides/testing-locally](https://fortep
 After a user adds an email or phone, Forte requires verification before that contact method can be used for OTP or password login. Google OAuth contact methods are verified by default. See [forteplatforms.com/docs/users/contact-methods](https://forteplatforms.com/docs/users/contact-methods).
 
 Verification codes: 6 digits, 10-minute expiry, 60-second resend cooldown.
+
+### Fixed Test OTP Codes (sandbox)
+
+Sandbox projects can pin a **fixed 6-digit code** on a contact method so automated tests complete OTP flows deterministically. While set, **every** OTP for that contact method — contact verification, OTP login, and email/SMS MFA challenges — uses the fixed code, and **nothing is delivered**. Expiry, resend cooldowns, and attempt limits behave exactly as in production, and the test must still trigger the normal send/resend call to arm the code.
+
+- **Eligibility (server-enforced):** US phone numbers with a `555` exchange (`+1XXX555XXXX`), or emails at reserved test domains (`example.com`/`.net`/`.org`, or any `.test`/`.example`/`.invalid` domain). Anything else → `400 CONTACT_METHOD_NOT_ELIGIBLE_FOR_FIXED_CODE`; non-sandbox projects → `400 SANDBOX_MODE_REQUIRED`.
+- **Assign / remove (server-side API or Console user page → contact method menu):** `PATCH /{projectId}/users/{userId}/contact-methods/{contactMethodId}` with `{ "fixedVerificationCode": "123456" }` or `{ "removeFixedVerificationCode": true }` (admin `adminOverrideUserContactMethod`, `FORTE_API_TOKEN` auth).
+- **Read back:** the code is visible as `fixedVerificationCode` on `ContactMethod` responses. Assignments are audited (`CONTACT_METHOD_FIXED_OTP_SET` / `CONTACT_METHOD_FIXED_OTP_REMOVED` action-log entries).
+- Verifying the contact does **not** clear the fixed code — it keeps working for subsequent login and MFA flows.
+
+Canonical doc: [forteplatforms.com/docs/users/contact-methods](https://forteplatforms.com/docs/users/contact-methods)
 
 ### Unverified Contact Method Reservations and Reclaim
 
