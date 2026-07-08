@@ -136,6 +136,8 @@ and WebAuthn). Projects with MFA off behave exactly as before.
   password reset) now carries an optional **`mfaStatus`**: `SATISFIED` (full session), `CHALLENGE_REQUIRED`, or
   `ENROLLMENT_REQUIRED`. The latter two return a **short-lived pending token** that only works on the MFA endpoints +
   logout and is rejected everywhere else (including the deployed app) with `401 MFA_REQUIRED`. It is not renewable.
+  A pending response carries the top-level `userId` but **no `userObject`** — the full user object arrives from
+  `verifyMfa` once the second factor is satisfied.
 - Branch on `mfaStatus`. For email/SMS OTP and WebAuthn, call `forte.users.sendMfaChallenge({ type })` then
   `forte.users.verifyMfa({ type, code | webAuthnAssertion })`; for authenticator-app (TOTP) and backup codes call
   `verifyMfa` directly. On success Forte swaps the pending token for a full session. Browser clients ride the
