@@ -124,8 +124,10 @@ If the update triggers a new build, the CLI prints `"A new deployment has been t
 > There is **no** `forte services pause` / `resume` command. Pausing a service — stopping all of its
 > provisioned compute and billing — is done from the console service page or the server-side API
 > (`forte.projects.pauseService` / `resumeService`). While paused, the service's endpoint returns
-> 503 `SERVICE_PAUSED`; resuming it (or any new deployment, including push-triggered ones) brings it
-> back online.
+> 503 `SERVICE_PAUSED`; resuming it (or a deployment the customer triggers themselves — console
+> retry/deploy or a config-change rebuild) brings it back online. GitHub-triggered builds (push or
+> release) do **not** resume a paused service: they are recorded and immediately cancelled (free,
+> with a "Build skipped" message) until the service is resumed.
 
 ---
 
@@ -372,7 +374,7 @@ forte actions create <projectId> --name one-shot --service <serviceId> --path /j
 | Build fails with "no exposed port" / "no health check" / "framework not recognized" | Forte couldn't detect the port or a GET health-check route from the code | Expose a port (Dockerfile `EXPOSE` / listen on `$PORT`) and a GET health route, or set `--health-check-port` / `--health-check-path`. See `references/build-and-detection.md`. |
 | Wrong build command or output dir on a website | Auto-detection picked the wrong framework setup | Override with `--build-command` / `--output-dir` (or `--reset-detected-config` to re-detect). |
 | Proxy fails to start | Port 8080 already in use | Use `--proxy-port 8081` (also auto-retries up to 5 times) |
-| Requests to a service's endpoint return 503 with `SERVICE_PAUSED` (and don't show up in `forte requests`) | The service is paused — all provisioned compute is stopped | Resume it from the console service page, or trigger a new deployment (deploys auto-resume a paused service) |
+| Requests to a service's endpoint return 503 with `SERVICE_PAUSED` (and don't show up in `forte requests`) | The service is paused — all provisioned compute is stopped | Resume it from the console service page, or trigger a deployment from the console (manually triggered deploys auto-resume a paused service; GitHub push/release builds are skipped while paused) |
 | `forte whoami` fails or auth errors | Missing or expired credentials | Run `forte login` |
 | A `forte` command fails with `TERMS_OF_SERVICE_NOT_ACCEPTED` (HTTP 403) | The account hasn't accepted the Forte Terms of Service — common when the account was created during `forte login` | Accept the terms in the console (the CLI opens it for you), then re-run the command — or re-run `forte login`. |
 | `--branch` required error | `--trigger push` needs a branch | Add `--branch <branch>` |
