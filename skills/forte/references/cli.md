@@ -93,7 +93,7 @@ forte services delete [projectId] [serviceId] [--yes]
 | `--trigger <push\|release>` | `push` | `push` deploys on every push to `--branch`; `release` deploys on GitHub releases. |
 | `--base-dir <path>` | repo root | Base directory within the repo for monorepos. |
 | `--cpu <vcpu>` | `0.25` | Container size in vCPU: `0.25`, `0.5`, `1`, or `2`. |
-| `--instances <n>` | `1` | Base instances kept warm, 1–10. |
+| `--instances <n>` | `1` | Provisioned instances kept warm, 1–10. |
 | `--health-check-port <n>` | auto-detected | Override the detected listening port. Usually unnecessary — Forte detects it. |
 | `--health-check-path <path>` | auto-detected | Override the detected health-check path (must start with `/`). Usually unnecessary. |
 | `--env KEY=VALUE ...` | — | Environment variables. Repeatable. `FORTE_` and `AWS_` prefixes are reserved. |
