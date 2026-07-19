@@ -1,6 +1,6 @@
 # CLI Reference
 
-This is the **complete, authoritative** `forte` command surface. The CLI has **exactly 14 commands**: `login` (alias `auth`), `logout`, `whoami`, `projects`, `services`, `websites`, `requests`, `logs`, `payments`, `payment-methods`, `payment-triggers`, `actions`, `proxy`, `help`. There is **no** `forte init`, `forte deploy`, `forte build`, `forte test`, `forte web`, `forte run`, `forte env`, `forte secrets`, or `forte databases`. **Do not invent commands or flags** — if it is not listed here, it does not exist. Flag names are exact (e.g. it is `--output-dir`, not `--out-dir`; `--health-check-path`, not `--healthcheck`).
+This is the **complete, authoritative** `forte` command surface. The CLI has **exactly 15 commands**: `login` (alias `auth`), `logout`, `whoami`, `projects`, `services`, `websites`, `databases`, `requests`, `logs`, `payments`, `payment-methods`, `payment-triggers`, `actions`, `proxy`, `help`. There is **no** `forte init`, `forte deploy`, `forte build`, `forte test`, `forte web`, `forte run`, `forte env`, or `forte secrets`. **Do not invent commands or flags** — if it is not listed here, it does not exist. Flag names are exact (e.g. it is `--output-dir`, not `--out-dir`; `--health-check-path`, not `--healthcheck`).
 
 ## Installation
 
@@ -30,7 +30,7 @@ Full install guide: [forteplatforms.com/docs/getting-started/installation](https
 - **Interactive pickers.** Most commands take resource IDs as **positional arguments**. When a required `projectId` / `serviceId` / `websiteId` / `userId` / `actionId` / etc. is **omitted**, the CLI drops into an interactive picker instead of erroring — so `forte services list` (no project) prompts you to pick a project. In non-interactive contexts (CI), pass the IDs explicitly. `forte projects create` similarly prompts for the name if you omit it.
 - **First positional is usually the action.** Resource commands take the shape `forte <command> [action] [ids...]` where `action` defaults to `list`. For example `forte services` ≡ `forte services list`.
 - **`--yes`** skips confirmation prompts on destructive actions (`delete`, `remove`, `cancel`, `refund`).
-- **`--json`** (on `requests` and `logs`) prints raw JSON instead of a table.
+- **`--json`** (on `requests`, `logs`, `databases metrics`, and `databases slow-queries`) prints raw JSON instead of a table.
 - **Credentials** live at `~/.forte/credentials.json` (owner-only, mode `0600`). They expire and are automatically re-prompted via `forte login` on next use.
 - **Environment selection.** The CLI targets Forte's production API by default. `FORTE_ENV` / `NODE_ENV` are development overrides used internally; customers don't need to set them.
 
@@ -184,6 +184,58 @@ forte websites deployments cancel [projectId] [websiteId] [buildId] [--yes]
 ```
 
 Doc: [forteplatforms.com/docs/core-concepts/websites](https://forteplatforms.com/docs/core-concepts/websites)
+
+---
+
+## Databases (early access)
+
+Managed PostgreSQL, scoped to a project. Requires early access on the account — without it every command returns a "not enabled for your account yet" error.
+
+```
+forte databases list         [projectId]
+forte databases get          [projectId] [databaseId]
+forte databases create       [projectId] [name] | [--name <name>] [--storage <gb>]
+forte databases update       [projectId] [databaseId] [--name <name>] [--storage <gb>]
+forte databases delete       [projectId] [databaseId] [--yes]
+forte databases metrics      [projectId] [databaseId] [--range 1|24|168] [--json]
+forte databases slow-queries [projectId] [databaseId] [--limit <n>] [--json]
+```
+
+| Flag | Default | Notes |
+|---|---|---|
+| `--name <name>` | prompted on create | 3–30 characters: letters, numbers, hyphens, underscores. Unique within the project. |
+| `--storage <gb>` | `10` | Provisioned storage, 10–250 GB. Can be raised later, but never below current usage. |
+| `--range <hours>` | `24` | Metrics window. Only `1`, `24`, and `168` are accepted. |
+| `--limit <n>` | `20` | Slow queries to show, capped at 200. |
+
+**PostgreSQL and the shared tier only.** There are no `--type`, `--tier`, `--cpu`, or `--memory` flags — MongoDB and the dedicated tier are not self-serve, and the shared tier has no per-tenant compute sizing. Sizing is storage-only.
+
+`create` returns while the database is still `CREATING`; `delete` returns while it is still `DELETING`. Both hand off to a background workflow — poll with `forte databases get`. A database cannot be deleted while any service is still connected.
+
+**Service connections** (`forte databases connections ...`):
+```
+forte databases connections list   [projectId] [databaseId]
+forte databases connections add    [projectId] [databaseId] [serviceId] | [--service <serviceId>]
+forte databases connections update [projectId] [databaseId] [connectionId]
+forte databases connections remove [projectId] [databaseId] [connectionId] [--yes]
+```
+
+Connecting mints a Postgres role dedicated to that service, injects the environment variables you name, and **redeploys the service**. The generated password is never shown. Disconnecting drops the role, removes the variables, and redeploys again.
+
+Environment variable names are chosen with these flags, on both `add` and `update`:
+
+| Flag | Sets |
+|---|---|
+| `--connection-string-var <name>` | Full `postgresql://...` connection string |
+| `--host-var <name>` | Host |
+| `--port-var <name>` | Port |
+| `--database-var <name>` | Database name |
+| `--username-var <name>` | Username |
+| `--password-var <name>` | Password |
+
+At least one is required. Names must start with a letter and contain only letters, numbers, and underscores, and may not begin with `FORTE_`. On `add`, if **no** `--*-var` flag is given the CLI prompts for a connection-string variable name pre-filled with `DATABASE_URL`; passing any one of them skips the prompt entirely. On `update`, the flags you pass are **merged over** the existing mapping, so unspecified variables are preserved — there is no way to remove a single variable, so remove and re-add the connection to drop one.
+
+Doc: [forteplatforms.com/docs/databases](https://forteplatforms.com/docs/databases)
 
 ---
 
