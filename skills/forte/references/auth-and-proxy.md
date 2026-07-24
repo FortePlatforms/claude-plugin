@@ -35,13 +35,14 @@ import { ForteClient } from '@forteplatforms/sdk';
 // No API token for browser-side user-login calls
 const forte = new ForteClient();
 
-const { userObject, sessionToken } = await forte.users.googleAuthLoginCallback({
+const result = await forte.users.googleAuthLoginCallback({
   projectId: 'your-project-id',
   gCsrfToken: gCsrfToken,         // from Google Sign-In response
   credential: credential,          // from Google Sign-In response
   recaptchaToken: recaptchaToken,  // optional — see reCAPTCHA section below
 });
-// sessionToken.sessionToken — store this or use the cookie Forte sets automatically
+// result.sessionToken.sessionToken — store this or use the cookie Forte sets automatically
+// result.userObject — omitted until verifyMfa completes a pending MFA step
 ```
 
 **Python**

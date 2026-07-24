@@ -140,12 +140,14 @@ Reference: [forteplatforms.com/docs/core-concepts/websites](https://forteplatfor
 
 ```typescript
 // Called after Google Sign-In button fires its callback
-const { userObject, sessionToken } = await forte.users.googleAuthLoginCallback({
+const result = await forte.users.googleAuthLoginCallback({
   projectId: 'your-project-id',
   gCsrfToken: gCsrfToken,         // from Google Sign-In
   credential: credential,          // from Google Sign-In
   recaptchaToken: recaptchaToken,  // optional — see auth-and-proxy.md
 });
+// result.sessionToken.sessionToken — store this or use the cookie Forte sets automatically
+// result.userObject — omitted until verifyMfa completes a pending MFA step
 ```
 
 Reference: [forteplatforms.com/docs/core-concepts/sdks](https://forteplatforms.com/docs/core-concepts/sdks)
