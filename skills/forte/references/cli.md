@@ -204,7 +204,7 @@ forte databases slow-queries [projectId] [databaseId] [--limit <n>] [--json]
 | Flag | Default | Notes |
 |---|---|---|
 | `--name <name>` | prompted on create | 3–30 characters: letters, numbers, hyphens, underscores. Unique within the project. |
-| `--storage <gb>` | `10` | Provisioned storage, 10–250 GB. Can be raised later, but never below current usage. |
+| `--storage <gb>` | `10` | Provisioned storage. The shared tier is fixed at 10 GB, so anything else is rejected — larger sizes are contact-support. |
 | `--range <hours>` | `24` | Metrics window. Only `1`, `24`, and `168` are accepted. |
 | `--limit <n>` | `20` | Slow queries to show, capped at 200. |
 
