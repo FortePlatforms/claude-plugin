@@ -163,7 +163,9 @@ forte websites deployments <list|get|logs|cancel> [projectId] [websiteId] [...]
 | `--env KEY=VALUE ...` | — | Environment variables. Repeatable. |
 | `--secret KEY=VALUE ...` | — | Secrets, encrypted at rest. Repeatable (create/update). |
 
-**Update-only** flags: `--upsert-secret KEY=VALUE ...`, `--remove-secret KEY ...`, and `--reset-detected-config` (clears the auto-detected build settings so Forte re-detects on the next push). Update is a PATCH — only supplied fields change.
+**Update-only** flags: `--upsert-secret KEY=VALUE ...`, `--remove-secret KEY ...`, `--reset-detected-config` (clears the auto-detected build settings so Forte re-detects on the next push), `--site-password <pw>`, and `--remove-site-password`. Update is a PATCH — only supplied fields change.
+
+**Site password protection** (`--site-password` / `--remove-site-password`): a simple shared-password gate enforced at the CDN edge, for **SERVER_SIDE (SSR) websites only** — the gateway rejects it on static sites with `SITE_PASSWORD_NOT_SUPPORTED`. This is **not** Forte end-user authentication; it's a single site-wide password that shows a challenge page to unauthenticated visitors. `--site-password` sets or replaces the password (4-128 chars); `--remove-site-password` disables protection. The two are mutually exclusive. `forte websites get` shows `Password protection: Enabled/Disabled` for SSR websites.
 
 **Deploy** — `--commit <sha>` deploys a specific commit (e.g. to roll back); when omitted, Forte redeploys the current branch HEAD.
 
