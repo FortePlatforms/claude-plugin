@@ -120,7 +120,8 @@ Without `stripeAccount`, confirmation fails with "no such PaymentIntent."
 ## Payment lifecycle
 
 Forte maps Stripe PaymentIntent status to a `Payment.state` and updates it automatically via webhooks:
-`DRAFT` → `PROCESSING` → `COMPLETED` (or `CANCELLED` / `FAILED`). Refunds move it to `REFUNDED`.
+`DRAFT` → `PROCESSING` → `COMPLETED` (or `CANCELLED` / `FAILED`). A full refund moves it to `REFUNDED`;
+a partial refund moves it to `PARTIALLY_REFUNDED` (still refundable) until the full amount is returned.
 
 A `Payment` left unconfirmed in `DRAFT` for 24 hours is automatically cancelled (state → `CANCELLED`,
 and its PaymentIntent is cancelled too, so it can't be confirmed afterward — create a new payment
@@ -128,7 +129,10 @@ instead of reusing the old client secret).
 
 ## Refunds — backend only
 
-`refundPayment` issues a **full** refund of a `COMPLETED` payment and sets state to `REFUNDED`.
+`refundPayment` refunds a `COMPLETED` payment. By default it refunds the full remaining balance and
+sets state to `REFUNDED`. Pass an optional `refundAmountCents` to refund only part of the charge —
+the payment then becomes `PARTIALLY_REFUNDED` and stays refundable (repeat until fully refunded).
+`refundedAmountCents` is the cumulative amount returned; `refundHistory` lists each refund.
 There is **no client-side route** — only:
 
 ```
@@ -140,13 +144,16 @@ const forte = new ForteClient({ apiToken: process.env.FORTE_API_TOKEN });
 
 // 1. Revoke the customer's entitlements in YOUR backend FIRST.
 await revokeEntitlements(userId, paymentId);
-// 2. Then refund through Forte.
+// 2. Full refund (omit refundAmountCents to refund the remaining balance)...
 const payment = await forte.projects.refundPayment({ projectId, userId, paymentId });
+// ...or a partial refund of $10.00 → state becomes PARTIALLY_REFUNDED.
+const partial = await forte.projects.refundPayment({ projectId, userId, paymentId, refundAmountCents: 1000 });
 ```
 
 ⚠️ A refund you initiate does **not** fire a `PAYMENT_REFUNDED` trigger — nothing calls back into
-your system, so you must reverse whatever the payment granted before refunding. Only `COMPLETED`
-payments are refundable (`PAYMENT_NOT_REFUNDABLE` otherwise; `PAYMENT_ALREADY_REFUNDED` if already done).
+your system, so you must reverse whatever the payment granted before refunding. Only `COMPLETED` or
+`PARTIALLY_REFUNDED` payments are refundable (`PAYMENT_NOT_REFUNDABLE` otherwise; `PAYMENT_ALREADY_REFUNDED`
+once fully refunded; `INVALID_REFUND_AMOUNT` if the amount is ≤ 0 or exceeds the remaining balance).
 
 ## Payment triggers (webhooks to your services)
 

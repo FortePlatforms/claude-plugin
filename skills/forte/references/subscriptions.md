@@ -67,8 +67,8 @@ quote (returns totals + estimated `nextRenewalAt`); like create, it's on both su
 - **Dunning**: a failed renewal → `PAST_DUE` + retries over a grace window; updating the card recovers
   immediately; exhausting retries → `CANCELLED`. `paymentMethodExpiresBeforeNextRenewal` + the cached
   `cardBrand/cardLast4/cardExp*` let you warn before failure.
-- **Refund**: refunding a subscription charge **cancels the subscription by default**
-  (`keepSubscriptionActive=true` to keep billing); a dispute always cancels.
+- **Refund**: refunding a subscription charge **cancels the subscription by default** — even a partial
+  refund (`keepSubscriptionActive=true` to keep billing); a dispute always cancels.
 
 ## Triggers (reuse Payment Triggers)
 

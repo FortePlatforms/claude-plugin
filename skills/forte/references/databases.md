@@ -27,9 +27,10 @@ provisions it, generates the credentials, encrypts it, and backs it up daily.
   the password and **never shows it** — not in the console, not in the API, not in the service's env var
   list. Disconnecting drops the role, removes the variables, and redeploys.
 - **Encrypted.** Storage is encrypted; connections require TLS (`sslmode=require`).
-- **Fixed 10 GB of storage.** The shared tier sells exactly one size — larger storage is **contact
-  support**, either as a per-account exception or the dedicated tier. Do not offer a resize or a custom
-  size. There is **no compute sizing on the shared tier**; compute is shared across the cluster.
+- **Customizable 1–10 GB of storage** (defaults to 2 GB). Pick any whole-GB size in that range at
+  create time, or resize an existing database within it. Larger than 10 GB is **contact support**,
+  either as a per-account exception or the dedicated tier. There is **no compute sizing on the shared
+  tier**; compute is shared across the cluster.
 - **Daily backups.** Restore is a support request. Do **not** promise point-in-time recovery, read
   replicas, high availability, or a recovery-point objective.
 - **Storage enforcement.** Forte emails at 80% and 95% full. At 100% the database goes **read-only** —
@@ -41,7 +42,7 @@ provisions it, generates the credentials, encrypts it, and backs it up daily.
 | Limit | Value |
 |---|---|
 | Databases per account | 5 (1 without a verified billing method) |
-| Storage per database | 10 GB |
+| Storage per database | 1–10 GB (2 GB default) |
 | Database users per database | 25 |
 | Services connected per database | 20 |
 | Concurrent connections per database user | 5 |
