@@ -59,7 +59,7 @@ Ask these questions using AskUserQuestion BEFORE running any `forte` commands:
 1. **Environments**: "Do you want one Forte project, or separate staging and production projects? Forte recommends two — they're free and unlimited." If they want a safe test environment (Stripe test-mode payments, hard-deletable users, contact-method overrides), mention **sandbox (test) mode** — but note it can only be enabled **at project creation time in the Console** (not via the CLI) and is **permanent** afterward. See `references/api-surfaces.md`.
 2. **Service name**: "What should the service be called?" (suggest the repo name or package name from `package.json`)
 3. **Branch**: "Which branch should trigger auto-deployment?" (suggest the current branch)
-4. **Environment variables**: "Any environment variables to set now? Provide them as KEY=VAL pairs, or skip." (Note: `FORTE_` and `AWS_` prefixes are reserved — do not use them for custom vars.)
+4. **Environment variables**: "Any environment variables to set now? Provide them as KEY=VAL pairs, or skip." (Note: the `FORTE_` prefix is reserved for both services and websites; websites additionally reserve the `AWS_` prefix. Don't use these for custom vars.)
 5. **Auth exclusions** (optional): "Are there routes that should bypass user auth, like `/health` or `/api/webhooks/**`?" (Ant patterns; skip if they don't know yet — configurable later with `forte services update`.)
 
 ## Step 5 — Create project(s)

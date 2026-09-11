@@ -210,7 +210,7 @@ Full usage: [forteplatforms.com/docs/core-concepts/sdks](https://forteplatforms.
 | `FORTE_PROJECT_ID` | The project this service belongs to |
 | `FORTE_SERVICE_ID` | This service's ID |
 
-These are injected automatically — do not set them manually and do not use `FORTE_` or `AWS_` as a prefix for your own variables (both prefixes are reserved).
+These are injected automatically — do not set them manually and do not use `FORTE_` as a prefix for your own variables (it is reserved). On **websites** the `AWS_` prefix is reserved too, but on services `AWS_*` variables are allowed.
 
 Set custom env vars at service creation or update time:
 ```bash

@@ -96,7 +96,7 @@ forte services delete [projectId] [serviceId] [--yes]
 | `--instances <n>` | `1` | Provisioned instances kept warm, 1–10. |
 | `--health-check-port <n>` | auto-detected | Override the detected listening port. Usually unnecessary — Forte detects it. |
 | `--health-check-path <path>` | auto-detected | Override the detected health-check path (must start with `/`). Usually unnecessary. |
-| `--env KEY=VALUE ...` | — | Environment variables. Repeatable. `FORTE_` and `AWS_` prefixes are reserved. |
+| `--env KEY=VALUE ...` | — | Environment variables. Repeatable. The `FORTE_` prefix is reserved. |
 | `--secret KEY=VALUE ...` | — | Secrets, encrypted at rest, never echoed back. Repeatable. |
 | `--enable-body-logging` | off | Capture request/response bodies in logs. |
 
@@ -160,7 +160,7 @@ forte websites deployments <list|get|logs|cancel> [projectId] [websiteId] [...]
 | `--node-version <v>` | auto-detected | Node.js **major** version, e.g. `22`. |
 | `--install-command <cmd>` | auto-detected | Override the dependency-install command. |
 | `--subdirectory <path>` | repo root | Subdirectory within the repo to build from (monorepos). |
-| `--env KEY=VALUE ...` | — | Environment variables. Repeatable. |
+| `--env KEY=VALUE ...` | — | Environment variables. Repeatable. The `FORTE_` and `AWS_` prefixes are reserved (websites run on AWS Lambda, which owns `AWS_*`). |
 | `--secret KEY=VALUE ...` | — | Secrets, encrypted at rest. Repeatable (create/update). |
 
 **Update-only** flags: `--upsert-secret KEY=VALUE ...`, `--remove-secret KEY ...`, `--reset-detected-config` (clears the auto-detected build settings so Forte re-detects on the next push), `--site-password <pw>`, and `--remove-site-password`. Update is a PATCH — only supplied fields change.
