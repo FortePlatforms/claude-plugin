@@ -13,6 +13,15 @@ Forte sets the `Forte-User-Session-Token` cookie on success. **Never** call them
 `FORTE_API_TOKEN` (see `api-surfaces.md`). OTP and password login are enabled per project in settings
 (`emailLoginEnabled` / `phoneLoginEnabled` for OTP; a Password-login toggle with strength rules).
 
+> **Compliance registration is required to send email or SMS.** Turning on email, phone, or password
+> login (anything that makes Forte send a login code, verification, or password-reset message to your
+> users) requires an **APPROVED** compliance registration on the account
+> (`forteplatforms.com/console/compliance`). Without it, enabling any of these on the project fails
+> with `COMPLIANCE_REGISTRATION_NOT_APPROVED`. Email login additionally needs a verified SES sending
+> domain on the record (else `SES_TENANT_NOT_VERIFIED`); phone login additionally needs a `COMPLETE`
+> SMS registration (else `SMS_REGISTRATION_NOT_APPROVED`). Google OAuth has no such requirement — it
+> sends nothing. This is the same compliance gate that live payments sit behind (see `payments.md`).
+
 On top of any first factor, a project can require **[multi-factor authentication](#multi-factor-authentication)** —
 an optional second factor configured per project.
 

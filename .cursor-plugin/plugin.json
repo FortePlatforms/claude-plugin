@@ -1,0 +1,13 @@
+{
+  "name": "forte",
+  "displayName": "Forte",
+  "description": "Keeps your agent accurate on Forte's CLI, SDK, auth, and deployment workflows.",
+  "version": "1.0.0",
+  "author": { "name": "Forte Platforms" },
+  "homepage": "https://forteplatforms.com",
+  "repository": "https://github.com/FortePlatforms/claude-plugin",
+  "license": "MIT",
+  "keywords": ["forte", "deployment", "hosting", "authentication", "payments", "cli", "sdk"],
+  "logo": "assets/logo.png",
+  "skills": "./skills/"
+}

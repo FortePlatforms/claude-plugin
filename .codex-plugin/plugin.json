@@ -1,0 +1,31 @@
+{
+  "name": "forte",
+  "version": "1.0.0",
+  "description": "Keeps your agent accurate on Forte's CLI, SDK, auth, and deployment workflows.",
+  "author": { "name": "Forte Platforms" },
+  "homepage": "https://forteplatforms.com",
+  "repository": "https://github.com/FortePlatforms/claude-plugin",
+  "license": "MIT",
+  "keywords": ["forte", "deployment", "hosting", "authentication", "payments", "cli", "sdk"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Forte",
+    "shortDescription": "Deploy, debug, and integrate with Forte",
+    "longDescription": "Set up Forte projects, services, and websites from your repo, integrate the Forte SDK for end-user auth and payments, and debug failing requests and logs for deployed services with the forte CLI.",
+    "developerName": "Forte Platforms",
+    "category": "Developer Tools",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "websiteURL": "https://forteplatforms.com",
+    "privacyPolicyURL": "https://forteplatforms.com/privacy",
+    "termsOfServiceURL": "https://forteplatforms.com/terms",
+    "defaultPrompt": [
+      "Set up Forte for this app",
+      "Show me my recent Forte errors for the service this repo deploys to",
+      "Add Forte end-user authentication to this app"
+    ],
+    "brandColor": "#214ED5",
+    "composerIcon": "./assets/logo.png",
+    "logo": "./assets/logo.png",
+    "screenshots": []
+  }
+}

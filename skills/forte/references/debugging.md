@@ -28,13 +28,12 @@ forte services list <projectId>     # each row shows: <owner>/<repo> · <branch>
 
 Match `<owner>/<repo>` against the service rows **in memory** across the candidate projects.
 - One match → use it.
-- Several matches (e.g. staging + production) → use **AskUserQuestion** to let the user pick
-  the environment. Default the question toward production, since that's usually where the user
-  cares about errors.
+- Several matches (e.g. staging + production) → ask the user to pick the environment. Default
+  the question toward production, since that's usually where the user cares about errors.
 
-If you've resolved these before, you can cache the project/service IDs to Claude memory (the
-skill already suggests this for project IDs) so future sessions skip steps 1–2. Verify a cached
-ID still resolves before relying on it.
+If you've resolved these before, you can cache the project/service IDs to your agent memory
+(`references/setup-walkthrough.md` Step 7 covers how) so future sessions skip steps 1–2. Verify
+a cached ID still resolves before relying on it.
 
 ## 3. List the failing requests
 

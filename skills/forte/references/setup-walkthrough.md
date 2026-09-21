@@ -1,6 +1,6 @@
 # Setup Walkthrough
 
-When the customer says "set up Forte for my app", "deploy this on Forte", "help me connect Forte", or similar, follow these steps. Use AskUserQuestion to collect decisions before running commands.
+When the customer says "set up Forte for my app", "deploy this on Forte", "help me connect Forte", or similar, follow these steps. Ask the customer to collect decisions before running commands (use your structured question tool if you have one, e.g. AskUserQuestion in Claude Code).
 
 ---
 
@@ -18,6 +18,7 @@ Gather context without prompting the customer:
 
 - **Git remote URL**: read `.git/config` or run `git remote get-url origin`
 - **Current branch**: run `git rev-parse --abbrev-ref HEAD`
+- **Is the branch pushed?**: run `git ls-remote --heads origin <branch>`. Forte builds from GitHub, never from the local working tree, so an empty result (new repo with no commits, or a local-only branch) means Step 6 will fail with `GITHUB_BRANCH_NOT_FOUND`. Commit and `git push -u origin <branch>` before creating anything — ask the customer before pushing. Unpushed local commits likewise won't be in the first build.
 - **Framework / language**: check for `package.json` (Node.js/TypeScript), `requirements.txt` / `pyproject.toml` (Python), `pom.xml` / `build.gradle` (Java), etc. This is only to inform the **service-vs-website** decision below and the conversation — you don't need to get it exactly right, because Forte runs its own authoritative detection server-side at build time (see "How Forte builds your app" below).
 - **Service or website?** — see the decision rules below
 - **Already on Forte?**: run `forte projects list` to check for existing projects.
@@ -54,7 +55,7 @@ If Forte can't determine something with confidence, the **build fails with a spe
 
 ## Step 4 — Collect decisions
 
-Ask these questions using AskUserQuestion BEFORE running any `forte` commands:
+Ask these questions BEFORE running any `forte` commands:
 
 1. **Environments**: "Do you want one Forte project, or separate staging and production projects? Forte recommends two — they're free and unlimited." If they want a safe test environment (Stripe test-mode payments, hard-deletable users, contact-method overrides), mention **sandbox (test) mode** — but note it can only be enabled **at project creation time in the Console** (not via the CLI) and is **permanent** afterward. See `references/api-surfaces.md`.
 2. **Service name**: "What should the service be called?" (suggest the repo name or package name from `package.json`)
@@ -93,6 +94,11 @@ forte services create <projectId> \
 Don't pass port/health-check/Dockerfile flags here — Forte detects those from the code (see "How Forte builds your app" above). **Auth exclusions are set after creation** with `forte services update <projectId> <serviceId> --auth-exclude <antPattern> ...` (the `--auth-exclude` flag is not read on `create`).
 
 If the GitHub App is not installed, an error will mention repository access — remind the customer to install it at [github.com/apps/forte-platforms](https://github.com/apps/forte-platforms), then re-run.
+
+Create errors and their fixes (same for websites):
+
+- `GITHUB_BRANCH_NOT_FOUND` — the branch isn't on GitHub yet. Push it (`git push -u origin <branch>`), then re-run.
+- `GITHUB_REPOSITORY_NOT_ACCESSIBLE` — wrong repo URL, or the GitHub App is installed for selected repositories and this one isn't included. Fix the URL or add the repo to the installation, then re-run.
 
 ### If creating a website:
 
@@ -173,6 +179,8 @@ Console: https://forteplatforms.com/console/projects/<projectId>
 ```
 
 Write this as a new file (e.g., `memory/forte_project_ids.md`) and add a pointer to `MEMORY.md`.
+
+**In other agents** (Codex, Cursor, etc.), use the agent's own persistent memory if it has one. Otherwise offer to record the project ID(s) in the repo's `AGENTS.md` — only with the customer's explicit approval, per the rule above.
 
 ## Step 8 — Offer next steps
 

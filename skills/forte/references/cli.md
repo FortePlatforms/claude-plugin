@@ -1,6 +1,6 @@
 # CLI Reference
 
-This is the **complete, authoritative** `forte` command surface. The CLI has **exactly 15 commands**: `login` (alias `auth`), `logout`, `whoami`, `projects`, `services`, `websites`, `databases`, `requests`, `logs`, `payments`, `payment-methods`, `payment-triggers`, `actions`, `proxy`, `help`. There is **no** `forte init`, `forte deploy`, `forte build`, `forte test`, `forte web`, `forte run`, `forte env`, or `forte secrets`. **Do not invent commands or flags** — if it is not listed here, it does not exist. Flag names are exact (e.g. it is `--output-dir`, not `--out-dir`; `--health-check-path`, not `--healthcheck`).
+This is the **complete, authoritative** `forte` command surface. The CLI has **exactly 16 commands**: `login` (alias `auth`), `logout`, `whoami`, `projects`, `services`, `websites`, `databases`, `dns`, `requests`, `logs`, `payments`, `payment-methods`, `payment-triggers`, `actions`, `proxy`, `help`. There is **no** `forte init`, `forte deploy`, `forte build`, `forte test`, `forte web`, `forte run`, `forte env`, or `forte secrets`. **Do not invent commands or flags** — if it is not listed here, it does not exist. Flag names are exact (e.g. it is `--output-dir`, not `--out-dir`; `--health-check-path`, not `--healthcheck`).
 
 ## Installation
 
@@ -189,14 +189,14 @@ Doc: [forteplatforms.com/docs/core-concepts/websites](https://forteplatforms.com
 
 ---
 
-## Databases (early access)
+## Databases
 
-Managed PostgreSQL, scoped to a project. Requires early access on the account — without it every command returns a "not enabled for your account yet" error.
+Managed databases, scoped to a project. **PostgreSQL** is open beta and self-serve (no access request). The **MongoDB-compatible** engine is in **closed alpha** — `--type mongodb` returns `MANAGED_DATABASE_TYPE_ACCESS_REQUIRED` until the account is granted access (request it from the engine tile in the console).
 
 ```
 forte databases list         [projectId]
 forte databases get          [projectId] [databaseId]
-forte databases create       [projectId] [name] | [--name <name>] [--storage <gb>]
+forte databases create       [projectId] [name] | [--name <name>] [--type postgres|mongodb] [--storage <gb>]
 forte databases update       [projectId] [databaseId] [--name <name>] [--storage <gb>]
 forte databases delete       [projectId] [databaseId] [--yes]
 forte databases metrics      [projectId] [databaseId] [--range 1|24|168] [--json]
@@ -206,11 +206,12 @@ forte databases slow-queries [projectId] [databaseId] [--limit <n>] [--json]
 | Flag | Default | Notes |
 |---|---|---|
 | `--name <name>` | prompted on create | 3–30 characters: letters, numbers, hyphens, underscores. Unique within the project. |
+| `--type <engine>` | `postgres` | `create` only. `postgres` (open beta) or `mongodb` (closed alpha — request access first). The engine is fixed at create time. |
 | `--storage <gb>` | `2` | Provisioned storage. The shared tier accepts any whole number from 1 to 10 GB; larger sizes are contact-support. |
 | `--range <hours>` | `24` | Metrics window. Only `1`, `24`, and `168` are accepted. |
 | `--limit <n>` | `20` | Slow queries to show, capped at 200. |
 
-**PostgreSQL and the shared tier only.** There are no `--type`, `--tier`, `--cpu`, or `--memory` flags — MongoDB and the dedicated tier are not self-serve, and the shared tier has no per-tenant compute sizing. Sizing is storage-only.
+**Shared tier only.** There are no `--tier`, `--cpu`, or `--memory` flags — the dedicated tier is contact-support, and the shared tier has no per-tenant compute sizing. Sizing is storage-only.
 
 `create` returns while the database is still `CREATING`; `delete` returns while it is still `DELETING`. Both hand off to a background workflow — poll with `forte databases get`. A database cannot be deleted while any service is still connected.
 
@@ -222,22 +223,56 @@ forte databases connections update [projectId] [databaseId] [connectionId]
 forte databases connections remove [projectId] [databaseId] [connectionId] [--yes]
 ```
 
-Connecting mints a Postgres role dedicated to that service, injects the environment variables you name, and **redeploys the service**. The generated password is never shown. Disconnecting drops the role, removes the variables, and redeploys again.
+Connecting mints a role dedicated to that service, injects the environment variables you name, and **redeploys the service**. The generated password is never shown. Disconnecting drops the role, removes the variables, and redeploys again.
 
 Environment variable names are chosen with these flags, on both `add` and `update`:
 
 | Flag | Sets |
 |---|---|
-| `--connection-string-var <name>` | Full `postgresql://...` connection string |
+| `--connection-string-var <name>` | Full connection string (`postgresql://...` for Postgres, `mongodb://...` for MongoDB-compatible) |
 | `--host-var <name>` | Host |
 | `--port-var <name>` | Port |
 | `--database-var <name>` | Database name |
 | `--username-var <name>` | Username |
 | `--password-var <name>` | Password |
+| `--connection-string-format <fmt>` | Dialect of the connection string: `uri` (default), `jdbc`, `r2dbc`, `sqlalchemy`, `npgsql`, `prisma`, or `custom`. |
+| `--connection-string-template <tmpl>` | Required when `--connection-string-format custom`. Placeholders: `{host}` `{port}` `{database}` `{username}` `{password}` `{sslmode}`. |
+
+**Match the app's real expectations before connecting.** The env var names and the connection-string dialect are how the app finds its database, so first read the app's own config/code to learn what it needs, then pass the matching flags instead of accepting the `DATABASE_URL` default. If the app reads discrete `PGHOST`/`PGPORT`/`PGDATABASE`/`PGUSER`/`PGPASSWORD` (or `MONGODB_URI`, etc.), set the `--host-var`/`--port-var`/… flags; if its driver needs a specific dialect (`jdbc` or `r2dbc` for Spring/Java, `prisma` for Prisma, `sqlalchemy` for SQLAlchemy), set `--connection-string-format`. A mismatch redeploys the service with variables it never reads.
 
 At least one is required. Names must start with a letter and contain only letters, numbers, and underscores, and may not begin with `FORTE_`. On `add`, if **no** `--*-var` flag is given the CLI prompts for a connection-string variable name pre-filled with `DATABASE_URL`; passing any one of them skips the prompt entirely. On `update`, the flags you pass are **merged over** the existing mapping, so unspecified variables are preserved — there is no way to remove a single variable, so remove and re-add the connection to drop one.
 
 Doc: [forteplatforms.com/docs/databases](https://forteplatforms.com/docs/databases)
+
+---
+
+## DNS (beta)
+
+Host a domain's DNS on Forte. Account-level (not project-scoped) and requires a **verified billing method**. See `references/dns.md` for the full model (delegation, zone merge, scan/import, managed records).
+
+```
+forte dns list                                              # list hosted zones
+forte dns create      [domain] [--merge]                    # host a domain (whole domain or a subdomain)
+forte dns get         [dnsZoneId]                           # zone detail + delegation status
+forte dns sync        [dnsZoneId]                           # re-check nameserver delegation, activate if live
+forte dns delete      [dnsZoneId] [--yes]
+forte dns records list   [dnsZoneId]
+forte dns records add    [dnsZoneId] --name <n> --type <type> --value <v> [--value <v> ...] [--ttl <s>]
+forte dns records remove [dnsZoneId] --name <n> --type <type>
+```
+
+| Flag | Default | Notes |
+|---|---|---|
+| `--merge` | off | `create` only. Absorb zones you already host that overlap the new domain into one zone. |
+| `--name <name>` | — | `records add`/`remove`. Record name (e.g. `www`, `@` for apex). |
+| `--type <type>` | — | `records add`/`remove`. One of `A`, `AAAA`, `CNAME`, `MX`, `TXT`, `NS`, `CAA`, `SRV`. |
+| `--value <v>` | — | `records add`. The record value; repeat the flag for multiple values. |
+| `--ttl <seconds>` | `300` | `records add`. |
+| `--yes` | off | `delete`. Skip the confirmation prompt. |
+
+Omitting `[dnsZoneId]` opens an interactive zone picker; omitting `[domain]` on `create` prompts for it. Records Forte manages for connected websites/services are shown but **locked** — you can't edit them by hand. There is **no** `forte dns` support for buying a domain and **no** SDK for DNS — domain registration is console-only (`/console/domains`).
+
+Doc: [forteplatforms.com/docs/core-concepts/services](https://forteplatforms.com/docs/core-concepts/services) (custom domains) · Help: [DNS hosting](https://forteplatforms.com/help/deployments/dns-hosting)
 
 ---
 

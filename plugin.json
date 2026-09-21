@@ -1,0 +1,11 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "forte",
+  "version": "1.0.0",
+  "description": "Keeps your agent accurate on Forte's CLI, SDK, auth, and deployment workflows.",
+  "author": { "name": "Forte Platforms" },
+  "homepage": "https://forteplatforms.com",
+  "repository": "https://github.com/FortePlatforms/claude-plugin",
+  "license": "MIT",
+  "keywords": ["forte", "deployment", "hosting", "authentication", "payments", "cli", "sdk"]
+}

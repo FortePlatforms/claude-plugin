@@ -4,13 +4,14 @@ Use this to find the right link to give a customer when their question isn't ful
 
 | Topic | URL path | What it covers |
 |---|---|---|
-| CLI installation | `getting-started/installation` | Homebrew, curl, binary downloads, `forte login` |
-| 5-minute deploy quickstart | `getting-started/quickstart` | Create project → service → first deploy |
+| 5-minute deploy quickstart | `getting-started/quickstart` | CLI installation (Homebrew, curl, binaries), `forte login`, create project → service → first deploy |
+| Using AI with Forte | `getting-started/using-ai` | Agent plugin/skill install for Claude Code, Codex, and Cursor |
 | What is a project? | `core-concepts/projects` | Isolation, unlimited free projects, staging vs production pattern |
 | Client-side vs server-side API | `core-concepts/api-surfaces` | `forte.users.*` vs `forte.projects.*`, credential safety, choosing the right surface |
 | What is a service? | `core-concepts/services` | GitHub-backed containerized deploys, permanent HTTPS endpoint, auth path exclusions, injected env vars |
 | What is a website? | `core-concepts/websites` | GitHub-backed front-end deploys, build configuration, framework auto-detection, public URL on `sites.tryforte.dev` |
 | What is an action? | `core-concepts/actions` | Scheduled/recurring URL calls, one-time vs cron, retries, invocations, trusted-request headers (beta) |
+| Managed databases | `databases` | Postgres (open beta) & MongoDB-compatible (closed alpha), connecting to services, sizing, limits, pricing |
 | Sandbox (test) mode | `core-concepts/sandbox-mode` | Create-time-only immutable test projects, hard-delete, contact overrides, Stripe test mode |
 | SDKs (install + first call) | `core-concepts/sdks` | TS/Python/Java install, client creation, common use cases, custom attributes |
 | User model | `core-concepts/users` | User states, attributes, lifecycle overview |
@@ -28,5 +29,9 @@ Use this to find the right link to give a customer when their question isn't ful
 | Monitoring | `guides/monitoring` | Log viewing and metrics from the Forte dashboard |
 | Monorepo setup | `guides/monorepo` | Deploying one service out of a monorepo |
 | Pricing | `pricing` | Free tier, limits |
+
+DNS hosting and buying a domain don't have a `/docs/` page yet — point customers to the Help Center at
+[forteplatforms.com/help/deployments/dns-hosting](https://forteplatforms.com/help/deployments/dns-hosting)
+(and see `references/dns.md`).
 
 When in doubt, link to [forteplatforms.com/docs](https://forteplatforms.com/docs) and let the customer navigate.

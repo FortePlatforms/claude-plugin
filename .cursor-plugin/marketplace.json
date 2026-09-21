@@ -1,0 +1,11 @@
+{
+  "name": "forteplatforms",
+  "owner": { "name": "Forte Platforms" },
+  "plugins": [
+    {
+      "name": "forte",
+      "source": "./",
+      "description": "Keeps your agent accurate on Forte's CLI, SDK, auth, and deployment workflows."
+    }
+  ]
+}
