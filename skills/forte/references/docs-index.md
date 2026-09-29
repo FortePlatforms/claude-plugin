@@ -10,7 +10,7 @@ Use this to find the right link to give a customer when their question isn't ful
 | Client-side vs server-side API | `core-concepts/api-surfaces` | `forte.users.*` vs `forte.projects.*`, credential safety, choosing the right surface |
 | What is a service? | `core-concepts/services` | GitHub-backed containerized deploys, permanent HTTPS endpoint, auth path exclusions, injected env vars |
 | What is a website? | `core-concepts/websites` | GitHub-backed front-end deploys, build configuration, framework auto-detection, public URL on `sites.tryforte.dev` |
-| What is an action? | `core-concepts/actions` | Scheduled/recurring URL calls, one-time vs cron, retries, invocations, trusted-request headers (beta) |
+| What is an action? | `core-concepts/actions` | Background + scheduled work (replaces in-process schedulers), one-time vs cron, 120s limit, chunking/chaining larger jobs, retries, invocations, trusted-request headers (beta) |
 | Managed databases | `databases` | Postgres (open beta) & MongoDB-compatible (closed alpha), connecting to services, sizing, limits, pricing |
 | Sandbox (test) mode | `core-concepts/sandbox-mode` | Create-time-only immutable test projects, hard-delete, contact overrides, Stripe test mode |
 | SDKs (install + first call) | `core-concepts/sdks` | TS/Python/Java install, client creation, common use cases, custom attributes |
@@ -18,6 +18,8 @@ Use this to find the right link to give a customer when their question isn't ful
 | End-user authentication | `users/authentication` | Google OAuth, OTP (email/SMS) login, reCAPTCHA |
 | Password sign-in & reset | `users/passwords` | Password login, strength rules, change, reset modes, error codes |
 | Contact method verification | `users/contact-methods` | OTP flows, 6-digit codes, resend rules, expiry, reclaim |
+| Welcome message | `core-concepts/users/authentication#welcome-message` | Per-channel on/off toggles (Google, Email, SMS), when it sends, customizing it, `sendWelcomeMessage: false` opt-out, on-demand `forte-welcome` send |
+| Email templates & notification customization | `core-concepts/users/email-templates` | Custom named email templates (Mustache, lists), sending by name; customizing built-in verification, welcome, login OTP, invite, and password-reset messages |
 | Session tokens | `users/sessions` | Token format, 365-day default, renewal, logout |
 | User administration | `users/administration` | Active/Suspended/Deleted states, audit trail |
 | Deploying services | `guides/deploying-services` | Full build pipeline, Dockerfile auto-detection, build timeout, GitHub status |

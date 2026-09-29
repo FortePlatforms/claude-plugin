@@ -353,3 +353,77 @@ The reservation is **time-bound**, not permanent. Once the 10-minute verificatio
 - The other user is **mid-verification** — they added the identifier within the last 10 minutes and the code has not yet expired (resolution: wait for the window to elapse, then retry).
 
 Canonical doc: [forteplatforms.com/docs/users/contact-methods](https://forteplatforms.com/docs/users/contact-methods)
+
+---
+
+## Welcome Message
+
+Forte can send new end-users a welcome email or text on sign-up. It is **off by default** and configured
+per project, per channel, in **Console → Project → Settings → Notifications → Welcome**
+(`/console/projects/{projectId}/settings?tab=notifications&template=welcome`) or via
+`forte.projects.updateNotificationTemplates` (server-side, `FORTE_API_TOKEN`).
+
+| Toggle field | Sends | Triggered when |
+|---|---|---|
+| `welcomeOnGoogleEnabled` | Welcome **email** to the Google email | Google sign-in creates the user, or links Google to an account with no verified contact yet |
+| `welcomeOnEmailEnabled` | Welcome **email** | The user verifies an email contact (verification endpoint, OTP login, or password reset) |
+| `welcomeOnSmsEnabled` | Welcome **SMS** | The user verifies a phone contact (same paths) |
+
+- **At most one automatic welcome per user.** On send, `UserObject.welcomeMessageSent` becomes `true` and a
+  `WELCOME_MESSAGE_SENT` audit entry is recorded. A verification on a disabled channel sends and records
+  nothing, so a later verification on an enabled channel still sends it. Delivery failures are swallowed —
+  they never fail verification or sign-in.
+- **Per-registration opt-out:** `forte.users.registerUser({ projectId, registerUserRequest: { email, sendWelcomeMessage: false } })`.
+  Null/`true` keeps the default. An opted-out user never gets an automatic welcome on any channel, including a
+  later Google sign-in.
+- **On-demand send (server-side):** send the reserved template ID `forte-welcome` through the email-template
+  operation. Email only; ignores the project toggles and `welcomeMessageSent` (and doesn't set it); repeatable;
+  `templateParams` are ignored; a user with no verified email → `400 USER_NO_VERIFIED_CONTACT_METHODS`.
+  ```typescript
+  await forte.projects.sendUserEmailFromTemplate({
+    projectId, userId,
+    sendUserEmailFromTemplateRequest: { templateName: "forte-welcome" },
+  });
+  ```
+  The `forte-` prefix is reserved: creating a custom email template named `forte-*` → `400 CUSTOM_EMAIL_TEMPLATE_NAME_RESERVED`.
+
+Canonical doc: [forteplatforms.com/docs/core-concepts/users/authentication#welcome-message](https://forteplatforms.com/docs/core-concepts/users/authentication#welcome-message)
+
+## Customizing Notification Messages
+
+Every message Forte sends end-users is customizable per project in **Settings → Notifications** (one tab per
+message, live preview) or via `forte.projects.getNotificationTemplates` (returns `current` overrides +
+`defaults`) and `forte.projects.updateNotificationTemplates`. The update is a **partial patch**: omitted
+fields are unchanged; an empty string resets a field to Forte's default. Templates are Mustache.
+
+| Message | Request fields | Variables |
+|---|---|---|
+| Verification code | `emailVerificationSubject`, `emailVerificationHtmlBody`, `smsVerificationBody` | `code` (required in both bodies), `projectName`, `contactValue` |
+| Welcome | `welcomeEmailSubject`, `welcomeEmailHtmlBody` (Google + Email channels), `welcomeSmsBody`, plus the three `welcomeOn*Enabled` toggles | `projectName`, `userFullName`, `contactValue` |
+| Login OTP | `loginOtpEmailSubject`, `loginOtpEmailHtmlBody`, `loginOtpSmsBody` | `code` (required in both bodies), `projectName`, `contactValue` |
+| Invite | `inviteEmailSubject`, `inviteEmailHtmlBody` | `projectName`, `contactValue`, `inviterName`, plus invite custom attributes |
+| Password reset | `passwordResetEmailSubject`, `passwordResetEmailHtmlBody`, `passwordResetSmsBody` | `newPassword` or `resetUrl` (by reset mode), `projectName`, `contactValue` |
+
+Welcome defaults: subject `Welcome to {{projectName}}`; HTML `<p>Welcome to {{projectName}}, {{userFullName}}!</p><p>Thanks for signing up.</p>`;
+SMS `Welcome to {{projectName}}!`.
+
+```typescript
+await forte.projects.updateNotificationTemplates({
+  projectId,
+  updateNotificationTemplatesRequest: {
+    welcomeOnEmailEnabled: true,
+    welcomeOnGoogleEnabled: true,
+    welcomeEmailSubject: "Welcome aboard, {{userFullName}}",
+    welcomeEmailHtmlBody: "<p>Thanks for joining {{projectName}}.</p>",
+  },
+});
+```
+
+Save errors: a variable not listed for that message, a Mustache partial/comment, or HTML with `<script>` or
+`on*=` handlers → `400 NOTIFICATION_TEMPLATE_INVALID`; a missing required variable →
+`400 NOTIFICATION_TEMPLATE_MISSING_REQUIRED_VARIABLE`.
+
+These built-in messages are separate from **custom email templates** — your own named templates
+(receipts, alerts) created with `createCustomEmailTemplate` and sent with `sendUserEmailFromTemplate`.
+
+Canonical doc: [forteplatforms.com/docs/core-concepts/users/email-templates](https://forteplatforms.com/docs/core-concepts/users/email-templates)

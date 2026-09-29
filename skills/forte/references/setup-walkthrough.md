@@ -53,6 +53,18 @@ Forte figures out how to build and run your code from the **actual repository** 
 
 If Forte can't determine something with confidence, the **build fails with a specific error** (e.g. no exposed port, no health-check route found) instead of guessing — so the fix is concrete. Everything detected is **overridable** with flags and re-detectable with `--reset-*`. So when a customer asks "what port will it use?" the answer is *"the one your app actually listens on — Forte reads it from your code,"* not a per-language default. Full detail (signals, failure modes, override/reset flags): `references/build-and-detection.md`.
 
+### Background work and schedulers
+
+Services get **no CPU when no request is in flight** (memory stays provisioned, so there are no cold starts). Anything in the app that runs outside a request won't run reliably on Forte. Scan the repo for:
+
+- **In-process schedulers**: Spring `@Scheduled` / `@EnableScheduling`, `ScheduledExecutorService`, `java.util.Timer`, Quartz, `setInterval`, `node-cron` / `cron` / `agenda` / `bree`, APScheduler, Celery beat, `schedule`, `rufus-scheduler`, `whenever`, Sidekiq-cron.
+- **Separate worker processes**: a Procfile `worker:` / `clock:` entry, a second entrypoint (`worker.ts`, `celery worker`, `sidekiq`, `rq worker`), or a docker-compose worker service.
+- **Post-response work**: fire-and-forget promises, `@Async` or started threads, or in-memory job queues that keep running after the handler responds.
+
+For each one you find, propose converting it to a **Forte Action**. Expose the job as a `POST` route on the service (verify `X-Forte-Trusted`, do the work, then return `2xx`, all within 120s), then register it with `forte actions create` using the same cron schedule. Split jobs that may run past 120s into chunks: see "Background work model" in `references/actions.md`. Remove or disable the in-process scheduler so the job doesn't run twice. Raise all of this in Step 4.
+
+If a workload is genuinely long-running, persistent, or stateful (a queue consumer, an always-on bot or socket listener, long media processing) and can't be chunked, don't invent a workaround. Tell the customer that Forte doesn't support this yet, that it's actively building longer-running background workers, and that they should contact support@forteplatforms.com for early access.
+
 ## Step 4 — Collect decisions
 
 Ask these questions BEFORE running any `forte` commands:
@@ -61,7 +73,8 @@ Ask these questions BEFORE running any `forte` commands:
 2. **Service name**: "What should the service be called?" (suggest the repo name or package name from `package.json`)
 3. **Branch**: "Which branch should trigger auto-deployment?" (suggest the current branch)
 4. **Environment variables**: "Any environment variables to set now? Provide them as KEY=VAL pairs, or skip." (Note: the `FORTE_` prefix is reserved for both services and websites; websites additionally reserve the `AWS_` prefix. Don't use these for custom vars.)
-5. **Auth exclusions** (optional): "Are there routes that should bypass user auth, like `/health` or `/api/webhooks/**`?" (Ant patterns; skip if they don't know yet — configurable later with `forte services update`.)
+5. **Background jobs** (only if Step 3 found any): "Your app runs <job> with <scheduler>. On Forte that won't fire reliably, because services get no CPU between requests. Want me to convert it to a Forte Action that calls a route on a cron schedule?"
+6. **Auth exclusions** (optional): "Are there routes that should bypass user auth, like `/health` or `/api/webhooks/**`?" (Ant patterns; skip if they don't know yet — configurable later with `forte services update`.)
 
 ## Step 5 — Create project(s)
 

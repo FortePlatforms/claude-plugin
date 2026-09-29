@@ -410,7 +410,7 @@ forte payment-triggers test     [triggerId]
 
 ## Actions (beta)
 
-Schedule Forte to POST to one of your services on a cron schedule or once at a specific time. The target service must belong to the same project. See `references/actions.md`.
+Schedule Forte to POST to one of your services on a cron schedule or once at a specific time. The target service must belong to the same project. This is how to run background and scheduled jobs on Forte, since in-process schedulers don't fire reliably. The handler must finish within 120s. See `references/actions.md`.
 
 ```
 forte actions [list]       [projectId]

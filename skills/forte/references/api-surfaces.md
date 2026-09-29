@@ -54,7 +54,8 @@ const forte = new ForteClient({ apiToken: process.env.FORTE_API_TOKEN });
 
 Use it to: manage users as an admin (list, search, suspend, delete), read/set any user's contact
 methods without a code, create payments on behalf of any user, manage service/website deployments,
-read logs/metrics/build history, send email or SMS, create/revoke API keys.
+read logs/metrics/build history, send email or SMS (including saved email templates and the built-in
+`forte-welcome` message), customize the project's notification messages, create/revoke API keys.
 
 ## ⚠️ Credential safety — never ship `FORTE_API_TOKEN` to a browser
 
