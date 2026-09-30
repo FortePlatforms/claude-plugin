@@ -161,10 +161,11 @@ When a payment changes state, Forte POSTs to one of your Forte Services over a p
 it for fulfillment side effects (licenses, receipts, ledger writes).
 
 - Events: `PAYMENT_COMPLETED`; `PAYMENT_FAILED` (terminal failure — chiefly an async ACH bounce days
-  after `PROCESSING`); and `PAYMENT_REFUNDED` — the latter **only** for refunds/chargebacks Forte
-  detects via Stripe (e.g. a Stripe-dashboard refund or a lost dispute), **not** for refunds you
-  initiate via `refundPayment`.
+  after `PROCESSING`); and `PAYMENT_REFUNDED` — on every full or partial refund, whether from your
+  own `refundPayment` call (or the console **Refund** button), a Stripe-dashboard refund, or a lost dispute.
 - Configured per project in the console (Project settings).
+- Delivered over the private network, bypassing user auth: **don't add an auth exclusion** for the
+  target path.
 - Each delivery sends headers `Content-Type: application/json` and `X-Forte-Trusted: 1`, with body
   `{ userId, paymentId, paymentTime, state }`.
 - **Validate the `X-Forte-Trusted` header** — Forte strips it from any other request, so its presence

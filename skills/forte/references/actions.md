@@ -56,9 +56,10 @@ receiving service sees these headers:
 - `X-Forte-Action-Invocation-Id` — this specific invocation (use it to dedupe).
 - `X-Forte-Trusted: 1` — the same trusted-request signal used for payment triggers. **Validate this
   header**: Forte strips inbound `X-Forte-*`, so its presence proves the call came from Forte.
+- `X-Request-Id` — matches the invocation's entry in the service's request logs.
 
-Because the target is a Forte service, the request is already authenticated as Forte-internal — no public
-URL is exposed. Make handlers **idempotent on the invocation id**. Do the work **before** returning `2xx`,
+Forte delivers the request over its private network, bypassing user auth, so **don't add an auth exclusion**
+for `targetPath` — the `X-Forte-Trusted` check is what protects it. Make handlers **idempotent on the invocation id**. Do the work **before** returning `2xx`,
 within the **120-second** limit. Past that, the attempt is recorded as a timeout.
 
 ## Retries

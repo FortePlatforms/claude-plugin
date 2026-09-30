@@ -268,6 +268,9 @@ forte services update <projectId> <serviceId> \
 
 Pattern rules: `?` matches one char, `*` matches within a path segment, `**` matches across segments.
 
+Action and payment-trigger targets **don't** need exclusions: Forte delivers those over its private network,
+bypassing user auth. Exclusions are only for traffic from outside Forte (e.g. third-party webhooks).
+
 ---
 
 ## Local Development with forte proxy
