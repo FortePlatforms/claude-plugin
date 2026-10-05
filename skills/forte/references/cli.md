@@ -1,6 +1,6 @@
 # CLI Reference
 
-This is the **complete, authoritative** `forte` command surface. The CLI has **exactly 16 commands**: `login` (alias `auth`), `logout`, `whoami`, `projects`, `services`, `websites`, `databases`, `dns`, `requests`, `logs`, `payments`, `payment-methods`, `payment-triggers`, `actions`, `proxy`, `help`. There is **no** `forte init`, `forte deploy`, `forte build`, `forte test`, `forte web`, `forte run`, `forte env`, or `forte secrets`. **Do not invent commands or flags** — if it is not listed here, it does not exist. Flag names are exact (e.g. it is `--output-dir`, not `--out-dir`; `--health-check-path`, not `--healthcheck`).
+This is the **complete, authoritative** `forte` command surface. The CLI has **exactly 16 public commands**: `login` (alias `auth`), `logout`, `whoami`, `projects`, `services`, `websites`, `databases`, `dns`, `requests`, `logs`, `payments`, `payment-methods`, `payment-triggers`, `actions`, `proxy`, `help`, plus the hidden, unreleased `ops` beta command documented at the end. There is **no** `forte init`, `forte deploy`, `forte build`, `forte test`, `forte web`, `forte run`, `forte env`, or `forte secrets`. **Do not invent commands or flags** — if it is not listed here, it does not exist. Flag names are exact (e.g. it is `--output-dir`, not `--out-dir`; `--health-check-path`, not `--healthcheck`).
 
 ## Installation
 
@@ -468,3 +468,11 @@ forte actions create <projectId> --name one-shot --service <serviceId> --path /j
 | `forte whoami` fails or auth errors | Missing or expired credentials | Run `forte login` |
 | A `forte` command fails with `TERMS_OF_SERVICE_NOT_ACCEPTED` (HTTP 403) | The account hasn't accepted the Forte Terms of Service — common when the account was created during `forte login` | Accept the terms in the console (the CLI opens it for you), then re-run the command — or re-run `forte login`. |
 | `--branch` required error | `--trigger push` needs a branch | Add `--branch <branch>` |
+
+## ops (unreleased beta, hidden)
+
+`forte ops get <projectId> <incidentId> [--json] [--output <file>]`
+
+Not generally available: the command is hidden from `forte help` and only works for accounts enabled for the Ops Agent beta. Do not recommend it to users who aren't already working from an Ops Agent incident.
+
+Exports the complete stored Ops Agent incident as JSON. Requires beta access and project read access. `--output` creates a private file and refuses to overwrite an existing file. Without it, prints JSON. An access error directs the user to Forte for beta access.

@@ -21,6 +21,14 @@ Forte sets the `Forte-User-Session-Token` cookie on success. **Never** call them
 > domain on the record (else `SES_TENANT_NOT_VERIFIED`); phone login additionally needs a `COMPLETE`
 > SMS registration (else `SMS_REGISTRATION_NOT_APPROVED`). Google OAuth has no such requirement — it
 > sends nothing. This is the same compliance gate that live payments sit behind (see `payments.md`).
+>
+> **Sandbox exception (email only):** in a sandbox project, set the project's email sender to Forte
+> sandbox (`emailSender: "FORTE_SANDBOX"` on the project update, or **Settings → Authentication →
+> Email sender**). Email and password login can then be enabled without compliance. Mail is
+> sent from `fortesandbox.com` with a `[Sandbox]` subject prefix, capped at 5 emails per account per
+> UTC day by default (`402 SANDBOX_EMAIL_QUOTA_EXCEEDED`; support can raise it). Template sends and password resets only reach
+> addresses the user verified with an emailed code or Google sign-in — not override- or admin-verified
+> ones (`400 SANDBOX_EMAIL_RECIPIENT_UNVERIFIED`). Phone login stays compliance-gated.
 
 On top of any first factor, a project can require **[multi-factor authentication](#multi-factor-authentication)** —
 an optional second factor configured per project.
