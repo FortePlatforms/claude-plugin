@@ -75,3 +75,12 @@ The build surfaces a reason such as missing `package.json`, unsupported framewor
 - ❌ "Set the port/build command before deploying." (Only override when detection is wrong — otherwise let Forte detect.)
 
 > **Note on framing:** describe *what* Forte inspects and that it fails loudly — not *how* detection is implemented. Keep it to the repo signals and the customer-visible behavior.
+
+---
+
+## Pricing
+
+- **Standard build — $0.01 per build-minute**, rounded up per build. Applies to every build that reuses configuration Forte already detected. Builds cap at 30 minutes, so a standard build never costs more than $0.30.
+- **Smart build — $2.00 per build.** Applies when automatic configuration detection runs (first build of a service, or after a `--reset-*` flag).
+- Every build runs on a high-performance **4 vCPU / 8 GiB** build instance. Queue time, deployment rollout, and Forte's own internal retries are not billed.
+- Not billed: builds cancelled before an instance starts, builds skipped while a service is paused, and builds that fail fast because billing is required.
