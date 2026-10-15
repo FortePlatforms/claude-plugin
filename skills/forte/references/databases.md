@@ -16,7 +16,9 @@ provisions it, generates the credentials, encrypts it, and backs it up daily.
   `mongosh`, Compass, and every MongoDB driver work over TLS. It is **real and shipping**, but **not
   self-serve**: a customer must **request access from the engine tile** on the new-database page. Until
   it's granted, the create API rejects it with `MANAGED_DATABASE_TYPE_ACCESS_REQUIRED`. Never say Mongo
-  is unavailable or "coming soon" — say it's in closed alpha and how to request access. A few MongoDB
+  is unavailable or "coming soon" — say it's in closed alpha and how to request access. **Never submit
+  the access request yourself** (API or console); default to Postgres, and leave the request to a
+  customer who has decided they truly need a document database. A few MongoDB
   features aren't available yet (multi-document transactions, sharding, change streams, server-side
   roles); the aggregation pipeline and TTL indexes work. Unlike Postgres, MongoDB connections do **not**
   go through the transaction-mode pooler.
@@ -49,7 +51,8 @@ provisions it, generates the credentials, encrypts it, and backs it up daily.
 ## Connecting to a service — match the app's env vars
 
 The connection's env vars are the **only** thing that lets the app find its database, so name them to
-match what the app already reads. Before running `forte databases connections add`, inspect the app's own
+match what the app already reads. Before running `forte databases connections add` (or
+`forte services create --database`), inspect the app's own
 code/config (grep for `DATABASE_URL`, `POSTGRES_*`/`PG*`, `MONGODB_URI`/`MONGO*`, the ORM/driver config,
 `application.yaml`, `.env.example`, `settings.py`, `prisma/schema.prisma`, etc.) to decide:
 
@@ -66,6 +69,10 @@ code/config (grep for `DATABASE_URL`, `POSTGRES_*`/`PG*`, `MONGODB_URI`/`MONGO*`
 Don't just accept the `DATABASE_URL` default: if the names or format don't match what the app reads, the
 service redeploys with env vars it ignores and still can't connect. Mistakes are cheap to fix —
 `forte databases connections update` merges new names over the existing mapping, or remove and re-add.
+
+**Creating the service and the database together?** Create the database first, wait for `ACTIVE`, then
+pass it to `forte services create --database <databaseId>[=<VAR>]` with the same mapping flags. The first
+build ships with the variables, instead of building once and redeploying when the connection is added.
 
 ## Limits worth knowing
 

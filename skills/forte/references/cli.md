@@ -99,6 +99,7 @@ forte services delete [projectId] [serviceId] [--yes]
 | `--env KEY=VALUE ...` | — | Environment variables. Repeatable. The `FORTE_` prefix is reserved. |
 | `--secret KEY=VALUE ...` | — | Secrets, encrypted at rest, never echoed back. Repeatable. |
 | `--enable-body-logging` | off | Capture request/response bodies in logs. |
+| `--database <id>[=<VAR>] ...` | — | Connect managed databases at creation (up to 5) so the **first build** already has their variables — no follow-up redeploy. `=<VAR>` names that database's connection-string variable; otherwise `--connection-string-var`, or `DATABASE_URL`. The connection flags below (`--connection-string-format`, `--host-var`, …) apply to every `--database`. On a terminal with no `--database`, active databases are offered in a picker. |
 
 **Update** — only supplied fields change. Flags:
 
@@ -225,7 +226,7 @@ forte databases connections remove [projectId] [databaseId] [connectionId] [--ye
 
 Connecting mints a role dedicated to that service, injects the environment variables you name, and **redeploys the service**. The generated password is never shown. Disconnecting drops the role, removes the variables, and redeploys again.
 
-Environment variable names are chosen with these flags, on both `add` and `update`:
+Environment variable names are chosen with these flags, on `add`, `update`, and `forte services create --database`:
 
 | Flag | Sets |
 |---|---|
