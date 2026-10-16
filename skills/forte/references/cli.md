@@ -145,6 +145,7 @@ forte websites delete [projectId] [websiteId] [--yes]
 forte websites deploy [projectId] [websiteId] [--commit <sha>]
 forte websites domains <list|add|sync|remove> [projectId] [websiteId] [...]
 forte websites deployments <list|get|logs|cancel> [projectId] [websiteId] [...]
+forte websites connections <list|add|update|remove> [projectId] [websiteId] [...]
 ```
 
 **Create** requires `--name` and `--repo`. **Create / update** flags:
@@ -185,6 +186,24 @@ forte websites deployments get    [projectId] [websiteId] [buildId]
 forte websites deployments logs   [projectId] [websiteId] [buildId]
 forte websites deployments cancel [projectId] [websiteId] [buildId] [--yes]
 ```
+
+**Service connections** (`forte websites connections ...`): give a website an environment variable set to one of the project's service URLs, instead of pasting the URL into `--env`. The value is `https://<service domain><path>`. Each add, update, or remove rebuilds the website so the new value reaches its bundle.
+```
+forte websites connections list   [projectId] [websiteId]
+forte websites connections add    [projectId] [websiteId] [serviceId] [--var <name>] [--custom-domain <domain>] [--path <path>] [--replace-env]
+forte websites connections update [projectId] [websiteId] [connectionId] [--service <id>] [--var <name>] [--custom-domain <domain> | --forte-domain] [--path <path> | --remove-path]
+forte websites connections remove [projectId] [websiteId] [connectionId] [--yes]
+```
+
+| Flag | Default | Notes |
+|---|---|---|
+| `--var <name>` | prompted (add) | Variable name. The prompt suggests the framework's public name: `NEXT_PUBLIC_API_URL`, `VITE_API_URL`, `PUBLIC_API_URL` (Astro), and so on. Use a public prefix when browser code reads it. |
+| `--custom-domain <domain>` | Forte domain | Use one of the service's custom domains (name or ID). It must be active. |
+| `--forte-domain` | — | Update only: switch back to the service's Forte domain. Changing `--service` also falls back to the Forte domain unless `--custom-domain` is given. |
+| `--path <path>` | none | Appended to the URL, e.g. `/api/v1`. Must start with `/` and not end with `/`. `--remove-path` clears it on update. |
+| `--replace-env` | off | Add only: convert an existing plain environment variable with the same name into the connection. Secrets are never replaced. |
+
+A connection owns its variable name: `forte websites update --env` rejects that name until the connection is removed. While a website uses a service's URL, the service and the custom domain it uses can't be deleted.
 
 Doc: [forteplatforms.com/docs/core-concepts/websites](https://forteplatforms.com/docs/core-concepts/websites)
 
