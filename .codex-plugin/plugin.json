@@ -21,7 +21,7 @@
   "interface": {
     "displayName": "Forte",
     "shortDescription": "Deploy and debug on Forte",
-    "longDescription": "Check deploys, build logs, request logs, metrics and costs for your Forte services and websites, and redeploy from chat. Sets up Forte projects and the Forte SDK (end-user auth, payments) in your repo.",
+    "longDescription": "Create services, websites and databases, check deploys, build logs, request logs, metrics and costs, and redeploy from chat. Sets up Forte projects and the Forte SDK (end-user auth, payments) in your repo.",
     "developerName": "Forte Platforms",
     "category": "Developer Tools",
     "capabilities": [
