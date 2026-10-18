@@ -1,13 +1,15 @@
 {
   "name": "forteplatforms",
-  "owner": { "name": "Forte Platforms" },
+  "owner": {
+    "name": "Forte Platforms"
+  },
   "description": "Forte Platforms plugins for Claude Code.",
   "plugins": [
     {
       "name": "forte",
-      "displayName": "Forte",
+      "displayName": "Forte Platforms",
       "source": "./",
-      "description": "Keeps Claude accurate on Forte's CLI, SDK, auth, and deployment workflows."
+      "description": "Connects Claude to your Forte cloud account to view and manage infrastructure for your project"
     }
   ],
   "renames": {

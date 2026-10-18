@@ -1,11 +1,13 @@
 {
   "name": "forteplatforms",
-  "owner": { "name": "Forte Platforms" },
+  "owner": {
+    "name": "Forte Platforms"
+  },
   "plugins": [
     {
       "name": "forte",
       "source": "./",
-      "description": "Keeps your agent accurate on Forte's CLI, SDK, auth, and deployment workflows."
+      "description": "Connects Cursor to your Forte cloud account to view and manage infrastructure for your project"
     }
   ]
 }

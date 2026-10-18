@@ -1,27 +1,41 @@
 {
   "name": "forte",
-  "version": "1.0.0",
-  "description": "Keeps your agent accurate on Forte's CLI, SDK, auth, and deployment workflows.",
-  "author": { "name": "Forte Platforms" },
+  "version": "1.1.0",
+  "description": "Connects Codex to your Forte cloud account to view and manage infrastructure for your project",
+  "author": {
+    "name": "Forte Platforms"
+  },
   "homepage": "https://forteplatforms.com",
   "repository": "https://github.com/FortePlatforms/claude-plugin",
   "license": "MIT",
-  "keywords": ["forte", "deployment", "hosting", "authentication", "payments", "cli", "sdk"],
+  "keywords": [
+    "forte",
+    "deployment",
+    "hosting",
+    "authentication",
+    "payments",
+    "cli",
+    "sdk"
+  ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Forte",
-    "shortDescription": "Deploy, debug, and integrate with Forte",
-    "longDescription": "Set up Forte projects, services, and websites from your repo, integrate the Forte SDK for end-user auth and payments, and debug failing requests and logs for deployed services with the forte CLI.",
+    "shortDescription": "Deploy and debug on Forte",
+    "longDescription": "Check deploys, build logs, request logs, metrics and costs for your Forte services and websites, and redeploy from chat. Sets up Forte projects and the Forte SDK (end-user auth, payments) in your repo.",
     "developerName": "Forte Platforms",
     "category": "Developer Tools",
-    "capabilities": ["Interactive", "Read", "Write"],
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
     "websiteURL": "https://forteplatforms.com",
     "privacyPolicyURL": "https://forteplatforms.com/privacy",
     "termsOfServiceURL": "https://forteplatforms.com/terms",
     "defaultPrompt": [
-      "Set up Forte for this app",
-      "Show me my recent Forte errors for the service this repo deploys to",
-      "Add Forte end-user authentication to this app"
+      "Show recent errors for my Forte service",
+      "Redeploy my staging web app",
+      "Set up Forte for this app"
     ],
     "brandColor": "#214ED5",
     "composerIcon": "./assets/logo.png",

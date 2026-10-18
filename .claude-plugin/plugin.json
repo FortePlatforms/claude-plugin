@@ -1,7 +1,13 @@
 {
   "name": "forte",
-  "description": "Keeps Claude accurate on Forte's CLI, SDK, auth, and deployment workflows.",
+  "version": "1.1.0",
+  "description": "Connects Claude to your Forte account (deploys, logs, requests, metrics, costs) and keeps it accurate on Forte's CLI, SDK, auth, and deployment workflows.",
   "author": { "name": "Forte Platforms" },
   "homepage": "https://forteplatforms.com",
-  "license": "MIT"
+  "license": "MIT",
+  "icon": "./assets/logo.png",
+  "documentationUrl": "https://forteplatforms.com/docs/getting-started/using-ai",
+  "supportUrl": "https://forteplatforms.com/support",
+  "privacyPolicyUrl": "https://forteplatforms.com/privacy",
+  "termsOfServiceUrl": "https://forteplatforms.com/terms"
 }
