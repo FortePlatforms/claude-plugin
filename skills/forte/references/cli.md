@@ -79,6 +79,7 @@ forte services get [projectId] [serviceId]
 forte services create [projectId] --name <name> --repo <url> [--branch <branch>] [...]
 forte services update [projectId] [serviceId] [...]
 forte services delete [projectId] [serviceId] [--yes]
+forte services connections <list|add|update|remove> [projectId] [serviceId] [...]
 ```
 
 `forte services list` shows `<owner>/<repo> · <branch> · <endpoint>` per service, so you can match a service to a local git repo.
@@ -121,6 +122,15 @@ forte services delete [projectId] [serviceId] [--yes]
 > Auth exclusions are applied via `forte services update --auth-exclude ...` — they are **not** read on `create`.
 
 If the update triggers a new build, the CLI prints `"A new deployment has been triggered."` The Forte dashboard shows build status and logs.
+
+**Service and website connections** (`forte services connections ...`): give a service an environment variable set to another service's or a website's URL in the same project, instead of pasting the URL into `--env`. The value is `https://<target domain><path>`. Each add, update, or remove redeploys only this service; the target is untouched.
+```
+forte services connections list   [projectId] [serviceId]
+forte services connections add    [projectId] [serviceId] [targetId] [--service <id> | --website <id>] [--var <name>] [--custom-domain <domain>] [--path <path>] [--replace-env]
+forte services connections update [projectId] [serviceId] [connectionId] [--service <id> | --website <id>] [--var <name>] [--custom-domain <domain> | --forte-domain] [--path <path> | --remove-path]
+forte services connections remove [projectId] [serviceId] [connectionId] [--yes]
+```
+`[targetId]` on `add` is a service or website ID; omit it to pick from both. `--var` defaults to the target's name upper-snake-cased with `_URL` (`auth-api` → `AUTH_API_URL`). On `update`, `--service` retargets a service connection and `--website` a website connection; to switch kinds, remove the connection and add a new one.
 
 > There is **no** `forte services pause` / `resume` command. Pausing a service — stopping all of its
 > provisioned compute and billing — is done from the console service page or the server-side API
