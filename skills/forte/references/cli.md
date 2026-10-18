@@ -161,7 +161,7 @@ forte websites connections <list|add|update|remove> [projectId] [websiteId] [...
 | `--package-manager <pm>` | auto-detected | `npm`, `yarn`, `pnpm`, or `bun`. |
 | `--node-version <v>` | auto-detected | Node.js **major** version, e.g. `22`. |
 | `--install-command <cmd>` | auto-detected | Override the dependency-install command. |
-| `--subdirectory <path>` | repo root | Subdirectory within the repo to build from (monorepos). |
+| `--base-dir <path>` | repo root | Base directory within the repo to build from (monorepos). On update, an empty string clears it. |
 | `--env KEY=VALUE ...` | — | Environment variables. Repeatable. The `FORTE_` and `AWS_` prefixes are reserved (websites run on AWS Lambda, which owns `AWS_*`). |
 | `--secret KEY=VALUE ...` | — | Secrets, encrypted at rest. Repeatable (create/update). |
 

@@ -36,7 +36,7 @@ Forte has two deployable primitives. Pick the right one based on what the repo c
 | Express / Fastify / Hono / NestJS / Django / Flask / FastAPI / Spring / Rails / any HTTP server | **Service** |
 | Next.js with `output: 'export'`, Vite SPA, Astro with `output: 'static'`, Create React App, Vue/Angular static, plain `index.html` | **Website** |
 | Next.js / Nuxt / SvelteKit running with SSR (no static export) | **Either** — a **Website** for simple public hosting, or a **Service** when you need Forte to authenticate and observe every request (see note below) |
-| A monorepo with both a front-end and a back-end | **Both** — create one website AND one service, each with the appropriate `--subdirectory` (website) or `--base-directory` (service). See [Monorepo guide](https://forteplatforms.com/docs/guides/monorepo). |
+| A monorepo with both a front-end and a back-end | **Both** — create one website AND one service, each with `--base-dir <path>` pointing at its folder. See [Monorepo guide](https://forteplatforms.com/docs/guides/monorepo). |
 
 If the answer is ambiguous, ask the customer.
 

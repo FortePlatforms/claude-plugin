@@ -55,10 +55,10 @@ A website deploy detects the build pipeline from the repo:
 | Build command | `package.json` scripts / framework default | `--build-command <cmd>` |
 | Output directory | framework default (`dist`, `.next`, `build`, `.output`, …) | `--output-dir <dir>` |
 | Install command | inferred from package manager | `--install-command <cmd>` |
-| Monorepo app location | workspace config (`pnpm-workspace.yaml`, `workspaces`) | `--subdirectory <path>` |
+| Monorepo app location | workspace config (`pnpm-workspace.yaml`, `workspaces`) | `--base-dir <path>` |
 
 ### When website detection fails
-The build surfaces a reason such as missing `package.json`, unsupported framework, or ambiguous project structure (common in monorepos). Fix by pointing Forte at the right app with `--subdirectory`, or by supplying the build pipeline explicitly via the override flags above.
+The build surfaces a reason such as missing `package.json`, unsupported framework, or ambiguous project structure (common in monorepos). Fix by pointing Forte at the right app with `--base-dir`, or by supplying the build pipeline explicitly via the override flags above.
 
 ### Overriding & re-detecting (websites)
 - Pass any of the override flags on `create` or `update`.
