@@ -41,7 +41,7 @@ claude mcp add --transport http forte https://mcp.forteplatforms.com/mcp   # Cla
 codex mcp add forte --url https://mcp.forteplatforms.com/mcp                # Codex, then: codex mcp login forte
 ```
 
-Claude (claude.ai and desktop), ChatGPT, Cursor and VS Code add it as a custom connector with the same URL; one-click links are at `https://forteplatforms.com/integrations`. The first tool call opens a browser sign-in where the user picks what the assistant can do (read-only or deploy, billing read) and which projects it can see. They can disconnect it anytime under Organization → Connected apps in the console.
+In Claude (claude.ai and desktop) the user adds Forte from the Claude connector directory (`https://claude.ai/directory/forte`). ChatGPT, Cursor and VS Code add it as a custom connector with the same URL; one-click links are at `https://forteplatforms.com/integrations`. The first tool call opens a browser sign-in where the user picks what the assistant can do (read-only or deploy, billing read) and which projects it can see. They can disconnect it anytime under Account Settings → Connected apps in the console.
 
 ## Quick Command Reference
 

@@ -4,9 +4,9 @@ Connects Claude, ChatGPT, Codex, Cursor and VS Code to your Forte account, and k
 
 ## Connect Forte to your AI tools
 
-Forte runs a remote MCP server at `https://mcp.forteplatforms.com/mcp`. Once connected, your assistant can create services, websites and databases, check deploys, read build logs, request logs and metrics, look up costs, connect services, websites and databases to each other, and redeploy. The first time it calls a Forte tool, your browser opens a Forte sign-in and consent screen where you pick what it can do and which projects it can see. You can disconnect it anytime under Organization → Connected apps in the Forte console.
+Forte runs a remote MCP server at `https://mcp.forteplatforms.com/mcp`. Once connected, your assistant can create services, websites and databases, check deploys, read build logs, request logs and metrics, look up costs, connect services, websites and databases to each other, and redeploy. The first time it calls a Forte tool, your browser opens a Forte sign-in and consent screen where you pick what it can do and which projects it can see. You can disconnect it anytime under Account Settings → Connected apps in the Forte console.
 
-- **Claude (claude.ai, desktop):** [add Forte as a connector](https://claude.ai/customize/connectors?modal=add-custom-connector&connectorName=Forte&connectorUrl=https%3A%2F%2Fmcp.forteplatforms.com%2Fmcp).
+- **Claude (claude.ai, desktop):** [add Forte from the Claude connector directory](https://claude.ai/directory/forte).
 - **Claude Code:**
 
   ```bash
@@ -26,7 +26,9 @@ Forte runs a remote MCP server at `https://mcp.forteplatforms.com/mcp`. Once con
 
 Installing the plugin below also connects the MCP server.
 
-## Claude Code
+## Claude Code (legacy plugin)
+
+Prefer the Claude connector or `claude mcp add` above. The plugin still works if you'd rather use it: it adds Forte's skill and connects the same Forte server.
 
 ```
 /plugin marketplace add forteplatforms/claude-plugin
