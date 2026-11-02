@@ -30,7 +30,7 @@ Full install guide: [forteplatforms.com/docs/getting-started/installation](https
 - **Interactive pickers.** Most commands take resource IDs as **positional arguments**. When a required `projectId` / `serviceId` / `websiteId` / `userId` / `actionId` / etc. is **omitted**, the CLI drops into an interactive picker instead of erroring — so `forte services list` (no project) prompts you to pick a project. In non-interactive contexts (CI), pass the IDs explicitly. `forte projects create` similarly prompts for the name if you omit it.
 - **First positional is usually the action.** Resource commands take the shape `forte <command> [action] [ids...]` where `action` defaults to `list`. For example `forte services` ≡ `forte services list`.
 - **`--yes`** skips confirmation prompts on destructive actions (`delete`, `remove`, `cancel`, `refund`).
-- **`--json`** (on `requests`, `logs`, `databases metrics`, and `databases slow-queries`) prints raw JSON instead of a table.
+- **`--json`** (on `requests`, `logs`, `databases metrics`, `databases slow-queries`, `databases backups`, and `databases deleted`) prints raw JSON instead of a table.
 - **Credentials** live at `~/.forte/credentials.json` (owner-only, mode `0600`). They expire and are automatically re-prompted via `forte login` on next use.
 - **Environment selection.** The CLI targets Forte's production API by default. `FORTE_ENV` / `NODE_ENV` are development overrides used internally; customers don't need to set them.
 
@@ -100,7 +100,7 @@ forte services connections <list|add|update|remove> [projectId] [serviceId] [...
 | `--env KEY=VALUE ...` | — | Environment variables. Repeatable. The `FORTE_` prefix is reserved. |
 | `--secret KEY=VALUE ...` | — | Secrets, encrypted at rest, never echoed back. Repeatable. |
 | `--enable-body-logging` | off | Capture request/response bodies in logs. |
-| `--database <id>[=<VAR>] ...` | — | Connect managed databases at creation (up to 5) so the **first build** already has their variables — no follow-up redeploy. `=<VAR>` names that database's connection-string variable; otherwise `--connection-string-var`, or `DATABASE_URL`. The connection flags below (`--connection-string-format`, `--host-var`, …) apply to every `--database`. On a terminal with no `--database`, active databases are offered in a picker. |
+| `--database <id>[=<VAR>] ...` | — | Connect managed databases at creation (up to 5) so the **first build** already has their variables — no follow-up redeploy. `=<VAR>` names that database's connection-string variable; otherwise `--connection-string-var`, or `DATABASE_URL`. The connection flags below (`--connection-string-format`, `--host-var`, …) apply to every `--database`, except `--direct-connection-string-var`, which goes only to the dedicated PostgreSQL database among them (rejected when there is none or more than one). On a terminal with no `--database`, active databases are offered in a picker. |
 
 **Update** — only supplied fields change. Flags:
 
@@ -226,22 +226,32 @@ Managed databases, scoped to a project. **PostgreSQL** is open beta and self-ser
 ```
 forte databases list         [projectId]
 forte databases get          [projectId] [databaseId]
-forte databases create       [projectId] [name] | [--name <name>] [--type postgres|mongodb] [--storage <gb>]
-forte databases update       [projectId] [databaseId] [--name <name>] [--storage <gb>]
+forte databases create       [projectId] [name] | [--name <name>] [--type postgres|mongodb] [--tier shared|dedicated] [--size medium|large|xlarge] [--storage <gb>]
+forte databases create       [projectId] [name] --restore-from <databaseId> [--backup-id <id> | --point-in-time <ISO-8601>] [--size ...] [--storage <gb>]
+forte databases update       [projectId] [databaseId] [--name <name>] [--storage <gb>] [--size ...]
 forte databases delete       [projectId] [databaseId] [--yes]
 forte databases metrics      [projectId] [databaseId] [--range 1|24|168] [--json]
 forte databases slow-queries [projectId] [databaseId] [--limit <n>] [--json]
+forte databases backups      [projectId] [databaseId] [--limit <n>] [--json]
+forte databases deleted      [projectId] [--limit <n>] [--json]
 ```
 
 | Flag | Default | Notes |
 |---|---|---|
 | `--name <name>` | prompted on create | 3–30 characters: letters, numbers, hyphens, underscores. Unique within the project. |
 | `--type <engine>` | `postgres` | `create` only. `postgres` (open beta) or `mongodb` (closed alpha — request access first). The engine is fixed at create time. |
-| `--storage <gb>` | `2` | Provisioned storage. The shared tier accepts any whole number from 1 to 10 GB; larger sizes are contact-support. |
+| `--storage <gb>` | `2` | Provisioned storage. The shared tier accepts any whole number from 1 to 10 GB; for more, use `--tier dedicated` (10 GB up to the size's limit). |
 | `--range <hours>` | `24` | Metrics window. Only `1`, `24`, and `168` are accepted. |
-| `--limit <n>` | `20` | Slow queries to show, capped at 200. |
+| `--limit <n>` | `20` | Rows to show: slow queries or backups (capped at 200), deleted databases (capped at 100). |
+| `--restore-from <databaseId>` | — | `create` only. Restores a dedicated database (live, or deleted and still inside its backup retention) into a **new** dedicated PostgreSQL database. The source is never changed. |
+| `--backup-id <id>` | — | With `--restore-from`: the backup to restore (ids from `forte databases backups`). |
+| `--point-in-time <ts>` | — | With `--restore-from`: an ISO-8601 time **with a zone** (e.g. `2026-10-15T14:03:00Z`) inside the restorable window. Pass at most one of `--backup-id` / `--point-in-time`; with neither, the CLI prompts with the latest restorable point and the available backups. |
 
-**Shared tier only.** There are no `--tier`, `--cpu`, or `--memory` flags — the dedicated tier is contact-support, and the shared tier has no per-tenant compute sizing. Sizing is storage-only.
+The shared tier has no per-tenant compute sizing (storage-only). `--tier dedicated` (closed alpha) takes `--size`; the size is prompted when omitted.
+
+**Backups and restore.** `forte databases backups` lists a database's backups and, for a dedicated database, its restorable window and retention. Shared databases get daily backups kept 7 days; restoring one is contact-support. `forte databases deleted` lists deleted dedicated databases whose backups can still be restored. A restore always creates a new database: move service connections to it afterwards.
+
+`get` prints the host, port, and database name; for a dedicated database it prints the **pooled port** (app traffic; transactions only) and the **direct port** (migrations and session features; counts against max connections).
 
 `create` returns while the database is still `CREATING`; `delete` returns while it is still `DELETING`. Both hand off to a background workflow — poll with `forte databases get`. A database cannot be deleted while any service is still connected.
 
@@ -260,6 +270,7 @@ Environment variable names are chosen with these flags, on `add`, `update`, and 
 | Flag | Sets |
 |---|---|
 | `--connection-string-var <name>` | Full connection string (`postgresql://...` for Postgres, `mongodb://...` for MongoDB-compatible) |
+| `--direct-connection-string-var <name>` | Dedicated PostgreSQL only. The same connection string, in the same format, pointed at the **direct** (unpooled) port, without the pooler tweaks (`pgbouncer=true`, `prepareThreshold=0`, …). For migrations, `LISTEN`/`NOTIFY`, advisory locks, long sessions. Conventional names: `DIRECT_URL` (Prisma's `directUrl`), otherwise `DIRECT_DATABASE_URL`. Shared and MongoDB-compatible databases reject it. |
 | `--host-var <name>` | Host |
 | `--port-var <name>` | Port |
 | `--database-var <name>` | Database name |
@@ -270,7 +281,7 @@ Environment variable names are chosen with these flags, on `add`, `update`, and 
 
 **Match the app's real expectations before connecting.** The env var names and the connection-string dialect are how the app finds its database, so first read the app's own config/code to learn what it needs, then pass the matching flags instead of accepting the `DATABASE_URL` default. If the app reads discrete `PGHOST`/`PGPORT`/`PGDATABASE`/`PGUSER`/`PGPASSWORD` (or `MONGODB_URI`, etc.), set the `--host-var`/`--port-var`/… flags; if its driver needs a specific dialect (`jdbc` or `r2dbc` for Spring/Java, `prisma` for Prisma, `sqlalchemy` for SQLAlchemy), set `--connection-string-format`. A mismatch redeploys the service with variables it never reads.
 
-At least one is required. Names must start with a letter and contain only letters, numbers, and underscores, and may not begin with `FORTE_`. On `add`, if **no** `--*-var` flag is given the CLI prompts for a connection-string variable name pre-filled with `DATABASE_URL`; passing any one of them skips the prompt entirely. On `update`, the flags you pass are **merged over** the existing mapping, so unspecified variables are preserved — there is no way to remove a single variable, so remove and re-add the connection to drop one.
+At least one is required. Names must start with a letter and contain only letters, numbers, and underscores, and may not begin with `FORTE_`. On `add`, if **no** `--*-var` flag is given the CLI prompts for a connection-string variable name pre-filled with `DATABASE_URL`; passing any one of them skips the prompt entirely. `--direct-connection-string-var` is the exception: it is added alongside, so the prompt (or, on `services create`, the `DATABASE_URL` default) still applies. On `update`, the flags you pass are **merged over** the existing mapping, so unspecified variables are preserved — there is no way to remove a single variable, so remove and re-add the connection to drop one.
 
 Doc: [forteplatforms.com/docs/databases](https://forteplatforms.com/docs/databases)
 
