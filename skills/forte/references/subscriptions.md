@@ -64,8 +64,13 @@ quote (returns totals + estimated `nextRenewalAt`); like create, it's on both su
 - **Dunning**: a failed renewal → `PAST_DUE` + retries over a grace window; updating the card recovers
   immediately; exhausting retries → `CANCELLED`. `paymentMethodExpiresBeforeNextRenewal` + the cached
   `cardBrand/cardLast4/cardExp*` let you warn before failure.
-- **Refund**: refunding a subscription charge **cancels the subscription by default** — even a partial
-  refund (`keepSubscriptionActive=true` to keep billing); a dispute always cancels.
+- **Refund**: refunding a subscription charge through the API or console **cancels the subscription by
+  default**, even a partial refund. `keepSubscriptionActive=true` keeps billing, on full refunds too.
+  A partial refund made in the Stripe dashboard does **not** cancel it; a full refund there or a lost
+  dispute does.
+- **Plan plus one-time items**: use `createCheckout` (see `checkout` doc,
+  [forteplatforms.com/docs/guides/checkout](https://forteplatforms.com/docs/guides/checkout)) for one
+  charge covering one-time lines and up to 10 subscriptions.
 
 ## Triggers (reuse Payment Triggers)
 
@@ -89,8 +94,9 @@ Exact sequences:
   `SUBSCRIPTION_STATUS_CHANGED` `state:"CANCELLED"`; plus `PAYMENT_REFUNDED` if a refund/dispute caused it.
 
 Trigger body adds `event` (the event name), `subscriptionId` (on subscription events), and `state`
-(`COMPLETED`/`REFUNDED`/`PAST_DUE`/`CANCELLED`); `paymentId` is on payment events. Renewal
-`PAYMENT_COMPLETED` carries both `paymentId` and `subscriptionId`. Make handlers idempotent on
+(`COMPLETED`/`REFUNDED`/`PAST_DUE`/`CANCELLED`); `paymentId` is on payment events. `PAYMENT_COMPLETED`
+for a subscription's first charge or a renewal carries both `paymentId` and `subscriptionId`. A checkout
+sends one `PAYMENT_COMPLETED` with a `subscriptionIds` array (plus `subscriptionId` when exactly one). Make handlers idempotent on
 `(event, paymentId|subscriptionId, state)`. Delivery/headers/retries identical to payment triggers.
 
 Canonical doc: [forteplatforms.com/docs/guides/creating-subscriptions](https://forteplatforms.com/docs/guides/creating-subscriptions)
