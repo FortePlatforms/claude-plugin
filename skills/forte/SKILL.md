@@ -72,6 +72,8 @@ forte actions create <projectId> --name <n> --service <serviceId> --path </p> --
 forte actions create <projectId> --name <n> --service <serviceId> --path </p> --schedule one-time --at <iso8601>
 forte actions invoke <projectId> <actionId>                          # run once on demand
 forte actions invocations <projectId> <actionId>                     # list past invocations
+forte email-templates list <projectId>                               # list reusable email templates
+forte email-templates create <projectId> --name <n> --subject <s> --html @body.html
 forte payments list <projectId> <userId>                             # list a user's payments (beta)
 forte payment-methods list <projectId> <userId>                      # list a user's saved payment methods — cards & bank accounts (beta)
 forte payment-triggers list <projectId>                              # list payment-event webhooks (beta)

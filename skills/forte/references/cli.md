@@ -1,6 +1,6 @@
 # CLI Reference
 
-This is the **complete, authoritative** `forte` command surface. The CLI has **exactly 16 public commands**: `login` (alias `auth`), `logout`, `whoami`, `projects`, `services`, `websites`, `databases`, `dns`, `requests`, `logs`, `payments`, `payment-methods`, `payment-triggers`, `actions`, `proxy`, `help`, plus the hidden, unreleased `ops` beta command documented at the end. There is **no** `forte init`, `forte deploy`, `forte build`, `forte test`, `forte web`, `forte run`, `forte env`, or `forte secrets`. **Do not invent commands or flags** — if it is not listed here, it does not exist. Flag names are exact (e.g. it is `--output-dir`, not `--out-dir`; `--health-check-path`, not `--healthcheck`).
+This is the **complete, authoritative** `forte` command surface. The CLI has **exactly 17 public commands**: `login` (alias `auth`), `logout`, `whoami`, `projects`, `services`, `websites`, `databases`, `dns`, `requests`, `logs`, `payments`, `payment-methods`, `payment-triggers`, `actions`, `email-templates`, `proxy`, `help`, plus the hidden, unreleased `ops` beta command documented at the end. There is **no** `forte init`, `forte deploy`, `forte build`, `forte test`, `forte web`, `forte run`, `forte env`, or `forte secrets`. **Do not invent commands or flags** — if it is not listed here, it does not exist. Flag names are exact (e.g. it is `--output-dir`, not `--out-dir`; `--health-check-path`, not `--healthcheck`).
 
 ## Installation
 
@@ -54,7 +54,7 @@ Every Forte account must accept the Terms of Service before it can use the API. 
 
 ```
 forte projects [list]                                            # list all projects
-forte projects get [projectId]                                   # show one project
+forte projects get [projectId]                                   # show one project and its settings (change settings in the console)
 forte projects create [name]                                     # create a project (prompts for name if omitted)
 forte projects update [projectId] [--google-oauth-client-id <id>]
 forte projects delete [projectId] [--yes]
@@ -488,6 +488,22 @@ forte actions create <projectId> --name nightly --service <serviceId> --path /jo
 forte actions create <projectId> --name one-shot --service <serviceId> --path /jobs/run-once \
   --schedule one-time --at 2026-07-01T09:00:00Z
 ```
+
+---
+
+## Email templates
+
+Manage the reusable Mustache email templates a project's backend sends to users by name.
+
+```
+forte email-templates [list]  [projectId]
+forte email-templates get     [projectId] [name]
+forte email-templates create  [projectId] --name <name> --subject <subject> [--html <html|@path>] [--text <text|@path>]
+forte email-templates update  [projectId] [name] [--subject <subject>] [--html <html|@path>] [--text <text|@path>]
+forte email-templates delete  [projectId] [name] [--yes]
+```
+
+`create` needs at least one of `--html` or `--text`. `update` keeps any field you don't pass; `--text ""` or `--html ""` clears that body, as long as the other one remains. A template's name can't change, and names can't start with `forte-`.
 
 ---
 
