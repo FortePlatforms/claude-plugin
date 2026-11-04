@@ -24,6 +24,9 @@ Elements (and saves the card); renewals are **off-session** and automatic.
   point the customer at support.
 - `startTime` (optional, default now): a **future** start defers the first charge off-session to that
   time and **requires** a saved `paymentMethodId` (`SUBSCRIPTION_PAYMENT_METHOD_REQUIRED` otherwise).
+  **Free trial** = `startTime` at trial end (no separate setting). It stays `INCOMPLETE` with no trigger
+  until the first charge, so grant trial access on create, not on `ACTIVE` or `PAYMENT_COMPLETED`. To
+  collect a new card for a trial, use `createCheckout` (`checkout.md`).
 - `endTime` (optional): the last charge is the last cadence point ≤ `endTime`, then it cancels. Omit =
   bill forever.
 
@@ -59,8 +62,9 @@ quote (returns totals + estimated `nextRenewalAt`); like create, it's on both su
   if `PAST_DUE`, charges the new card immediately to recover).
 - **Change price**: `PUT .../subscriptions/{id}/items` with the **full** `lineItems` list → staged,
   effective next renewal (current period frozen).
-- **Cancel at period end**: `PATCH` `{ cancelAtPeriodEnd: true }`. **Cancel now**: `DELETE` (no refund of
-  the current period). Acting on a `CANCELLED` sub → 400.
+- **Cancel at period end**: `PATCH` `{ cancelAtPeriodEnd: true }`; before a future `startTime`, it cancels on
+  that date without charging. **Cancel now**: `DELETE` (no refund of the current period). Acting on a
+  `CANCELLED` sub → 400.
 - **Dunning**: a failed renewal → `PAST_DUE` + retries over a grace window; updating the card recovers
   immediately; exhausting retries → `CANCELLED`. `paymentMethodExpiresBeforeNextRenewal` + the cached
   `cardBrand/cardLast4/cardExp*` let you warn before failure.
@@ -68,7 +72,7 @@ quote (returns totals + estimated `nextRenewalAt`); like create, it's on both su
   default**, even a partial refund. `keepSubscriptionActive=true` keeps billing, on full refunds too.
   A partial refund made in the Stripe dashboard does **not** cancel it; a full refund there or a lost
   dispute does.
-- **Plan plus one-time items**: use `createCheckout` (see `checkout` doc,
+- **Plan plus one-time items**: use `createCheckout` (see `references/checkout.md`,
   [forteplatforms.com/docs/guides/checkout](https://forteplatforms.com/docs/guides/checkout)) for one
   charge covering one-time lines and up to 10 subscriptions.
 

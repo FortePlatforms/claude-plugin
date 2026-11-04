@@ -95,6 +95,7 @@ Omitting a required `projectId` / `serviceId` / `websiteId` / `userId` drops int
 | Hosting a domain's DNS on Forte, nameserver delegation, records, zone import; buying a domain through Forte (pricing, auto-renewal, WHOIS privacy, the Spaceship verification email, transfer-out) | `references/dns.md` |
 | "How does auth work", "how do sessions work", "proxy not working", OTP / password login; welcome message on sign-up (turning it on/off, `forte-welcome`); customizing verification/welcome/OTP/invite/password-reset emails and texts | `references/auth-and-proxy.md` |
 | Client-side vs server-side API, where `FORTE_API_TOKEN` is safe, sandbox/test mode | `references/api-surfaces.md` |
+| Which charging API to use: one-time purchase vs. subscription vs. checkout; a plan plus a setup fee or other one-time items in one charge; several subscriptions at once; refunding one item | `references/checkout.md` |
 | Charging users, payment previews, refunds, Stripe Elements, payment methods (card & ACH direct debit), off-session charges, payment triggers | `references/payments.md` |
 | Recurring billing — monthly/yearly subscriptions, renewals, dunning/grace, cancellation, subscription triggers | `references/subscriptions.md` |
 | Background jobs, cron/scheduled tasks, workers, `@Scheduled`/`setInterval` replacements, one-time future work, splitting long jobs, retries, invocations | `references/actions.md` |

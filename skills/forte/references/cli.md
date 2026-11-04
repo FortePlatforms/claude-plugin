@@ -382,7 +382,7 @@ Proxy guide: [forteplatforms.com/docs/guides/testing-locally](https://forteplatf
 
 ## Payments (beta)
 
-Create and manage one-off payments for a project's end-users. Charges go through the user's saved payment method. See `references/payments.md`.
+Create and manage one-off payments for a project's end-users. Charges go through the user's saved payment method. See `references/payments.md`. There are no CLI commands for subscriptions or checkouts; use the SDK or API (`references/subscriptions.md`, `references/checkout.md`).
 
 ```
 forte payments [list] [projectId] [userId] [--state <state>]

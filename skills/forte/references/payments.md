@@ -4,6 +4,8 @@ Forte's Payments API charges your end-users through Stripe, with Forte as the or
 (it handles webhooks, tax calculation, and chargebacks). Your company becomes the merchant of record
 after completing **Compliance Registration** in the console.
 
+`createPayment` is for one-time purchases. For a plan, use `createSubscription`; for one-time items and a plan in one charge, use `createCheckout`. See `references/checkout.md`.
+
 ## Prerequisites
 
 - The project owner has completed compliance registration (`forteplatforms.com/console/compliance`).
@@ -150,8 +152,8 @@ const payment = await forte.projects.refundPayment({ projectId, userId, paymentI
 const partial = await forte.projects.refundPayment({ projectId, userId, paymentId, refundAmountCents: 1000 });
 ```
 
-⚠️ A refund you initiate does **not** fire a `PAYMENT_REFUNDED` trigger — nothing calls back into
-your system, so you must reverse whatever the payment granted before refunding. Only `COMPLETED` or
+To refund individual lines, such as one item on a checkout, pass `createPaymentRefundRequest.lineItems`
+instead of `refundAmountCents` (see `references/checkout.md`). Only `COMPLETED` or
 `PARTIALLY_REFUNDED` payments are refundable (`PAYMENT_NOT_REFUNDABLE` otherwise; `PAYMENT_ALREADY_REFUNDED`
 once fully refunded; `INVALID_REFUND_AMOUNT` if the amount is ≤ 0 or exceeds the remaining balance).
 
@@ -167,7 +169,8 @@ it for fulfillment side effects (licenses, receipts, ledger writes).
 - Delivered over the private network, bypassing user auth: **don't add an auth exclusion** for the
   target path.
 - Each delivery sends headers `Content-Type: application/json` and `X-Forte-Trusted: 1`, with body
-  `{ userId, paymentId, paymentTime, state }`.
+  `{ userId, paymentId, paymentTime, state }`. A checkout fires one `PAYMENT_COMPLETED` that also has
+  `subscriptionIds`.
 - **Validate the `X-Forte-Trusted` header** — Forte strips it from any other request, so its presence
   proves the call is genuine.
 - Retry policy: 5 attempts, 60s apart, 30s timeout; success = HTTP 2xx. Make handlers **idempotent on

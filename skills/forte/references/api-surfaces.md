@@ -79,6 +79,8 @@ project-owner path your backend calls on their behalf.
 |---|---|---|
 | Payments | `createPayment` | `createPayment` (takes `userId`) |
 | Payment previews | `createPaymentPreview` | `createPaymentPreview` (takes `userId`) |
+| Subscriptions | `createSubscription` | `createSubscription` (takes `userId`) |
+| Checkouts | `createCheckout`, `createCheckoutPreview` | `createCheckout`, `createCheckoutPreview` (take `userId`) |
 | Contact methods | self-service add / verify / delete | admin add, override, mark verified without code |
 | Refunds | — (no client-side route) | `refundPayment` |
 | File content | own content only | any user's content |
