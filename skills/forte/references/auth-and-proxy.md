@@ -229,6 +229,31 @@ const forte = new ForteClient({ baseUrl: '/_forte' });
 await forte.users.completeOtpLogin({ projectId, pendingLoginId, completeOtpLoginRequest: { code } });
 ```
 
+Why: a browser sends a cookie only to the domain that set it. Against Forte's API the cookie lands on
+Forte's domain, never reaches the service, and the gateway rejects service requests with
+`401 NO_AUTHORIZATION_CREDENTIAL`. Through `/_forte` it lands on the service's host and rides along
+on every later request, so the gateway can add `X-Forte-User-Id`.
+
+**Required** when both hold:
+- browser code calls `forte.users.*` itself (login, renew, logout), **and**
+- requests to the service authenticate with the cookie, not an `Authorization` header.
+
+**Not needed** when:
+- the client sends `Authorization: Bearer <sessionToken>` (token from the login response's
+  `sessionToken.sessionToken`) — mobile, desktop, CLI, or a browser app that keeps the token. Cookie
+  domain is irrelevant.
+- the service's own backend route calls `forte.users.*` and sets the `Forte-User-Session-Token`
+  cookie on its response (see `examples/nextjs-service/app/api/auth/session/route.ts` pattern).
+- server-side code with `FORTE_API_TOKEN`.
+
+Use one method per client: a cookie and a bearer token that don't match → `401 MISMATCHED_AUTH_TOKENS`.
+
+Frontend on another host (`app.example.com` → service `api.example.com`): call `/_forte` on the
+service host (`new ForteClient({ baseUrl: 'https://api.example.com/_forte' })`), send service
+requests with `credentials: 'include'`, and allow credentials from the frontend origin in the
+service's CORS handler. The cookie is `SameSite=Lax`, so this only works same-site (same registrable
+domain). A cross-site frontend (`example.vercel.app` → `api.example.com`) never sends it — use bearer.
+
 Notes:
 - `/_forte` exposes the `forte.users.*` (user/session) surface **only** — the browser only ever holds
   a `Forte-User-Session-Token`, so nothing else is reachable through it.

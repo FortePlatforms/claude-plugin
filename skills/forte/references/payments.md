@@ -129,6 +129,26 @@ A `Payment` left unconfirmed in `DRAFT` for 24 hours is automatically cancelled 
 and its PaymentIntent is cancelled too, so it can't be confirmed afterward — create a new payment
 instead of reusing the old client secret).
 
+## Cancelling an unconfirmed payment
+
+Cancel an abandoned payment instead of waiting 24 hours (cart emptied, plan changed, payment replaced).
+It moves to `CANCELLED` and its PaymentIntent is cancelled, so the old client secret can't be confirmed.
+Cancellable: `DRAFT`, and `PROCESSING` while Stripe status is `requires_action` (unfinished 3DS / ACH
+verification). Already `CANCELLED` → returned unchanged (safe to retry). Anything else, or a confirmation
+that wins the race → `400 PAYMENT_NOT_CANCELLABLE`; refund instead once money has moved. `INCOMPLETE`
+subscriptions that start with this payment are cancelled too (future-dated ones are untouched). Both
+surfaces have a route:
+
+```
+DELETE /api/v1/{projectId}/users/me/payments/{paymentId}               # signed-in user
+DELETE /api/v1/projects/{projectId}/users/{userId}/payments/{paymentId} # backend
+```
+
+```typescript
+await forte.users.usersDeletePayment({ projectId, paymentId });                  // browser
+await forte.projects.projectsDeletePayment({ projectId, userId, paymentId });    // backend
+```
+
 ## Refunds — backend only
 
 `refundPayment` refunds a `COMPLETED` payment. By default it refunds the full remaining balance and

@@ -389,6 +389,7 @@ forte payments [list] [projectId] [userId] [--state <state>]
 forte payments create  [projectId] [userId] [--item "<spec>" ...] [...] | [--json <body|@file>]
 forte payments preview [projectId] [userId] [--item "<spec>" ...] [...] | [--json <body|@file>]
 forte payments refund  [projectId] [userId] [--payment-id <id>] [--amount-cents <n>] [--yes]
+forte payments cancel  [projectId] [userId] [--payment-id <id>] [--yes]
 ```
 
 | Flag | Applies to | Notes |
@@ -401,11 +402,11 @@ forte payments refund  [projectId] [userId] [--payment-id <id>] [--amount-cents 
 | `--shipping-line1/-line2/-city/-state/-postal-code/-country <v>` | create, preview | Shipping address (country is 2-letter). |
 | `--json <value>` | create, preview | Full request body as JSON, or `@path/to/file.json`. Alternative to the per-field flags. |
 | `--state <state>` | list | Filter by payment state. |
-| `--payment-id <id>` | refund | Payment to refund (prompts among completed/partially-refunded payments if omitted). |
+| `--payment-id <id>` | refund, cancel | Payment to refund or cancel (prompts among refundable or unconfirmed payments if omitted). |
 | `--amount-cents <n>` | refund | Partial refund amount in cents. Omit to refund the full remaining balance. |
-| `--yes` | refund | Skip the confirmation prompt. |
+| `--yes` | refund, cancel | Skip the confirmation prompt. |
 
-`preview` calculates totals/tax without creating a charge.
+`preview` calculates totals/tax without creating a charge. `cancel` cancels a payment the customer hasn't confirmed yet (see `references/payments.md`).
 
 ---
 

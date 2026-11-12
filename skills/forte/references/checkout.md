@@ -56,7 +56,7 @@ const result = await forte.users.createCheckout({
 const { payment, subscriptions, stripeClientSecret, stripePublishableKey, stripeConnectedAccountId } = result;
 ```
 
-- Each subscription takes `interval` (`MONTH` or `YEAR`), `lineItems`, and optional `description`, `metadata`, `startTime` (must be in the future, else `CHECKOUT_START_TIME_INVALID`), and `endTime` (must be in the future and after `startTime`, else `CHECKOUT_END_TIME_INVALID`).
+- Each subscription takes `interval` (`MONTH` or `YEAR`), `lineItems`, and optional `description`, `metadata`, `startTime` (must be in the future, else `CHECKOUT_START_TIME_INVALID`), and `endTime` (must be in the future and after `startTime`, else `CHECKOUT_END_TIME_INVALID`). In the SDK both are `Date` objects (a string throws); over HTTP, ISO 8601 strings.
 - `subscriptions` in the response matches request order, and each starts `INCOMPLETE`. It is empty for a one-time-only checkout.
 - `metadata` on the checkout is stored on the `Payment`.
 - Forte sets `lineItemId` and `subscriptionId` on lines and ignores any you send.
@@ -65,7 +65,7 @@ const { payment, subscriptions, stripeClientSecret, stripePublishableKey, stripe
 
 Confirm `stripeClientSecret` once with Stripe Elements, exactly as for a one-off payment (see `payments.md`; `stripeAccount` is required). That one confirmation pays every line, saves the card, and flips every subscription to `ACTIVE`. This applies to server-side calls and pinned saved cards too: the customer still confirms in the browser. If a saved card can't be reused for renewals, each subscription is cancelled and the one-time items stay paid.
 
-An unconfirmed checkout is abandoned: its `DRAFT` payment is cancelled after 24 hours, and its `INCOMPLETE` subscriptions are cancelled too. Create a new checkout rather than reusing the client secret.
+An unconfirmed checkout is abandoned: its `DRAFT` payment is cancelled after 24 hours, and its `INCOMPLETE` subscriptions are cancelled too. To cancel it sooner, cancel the checkout's payment (`usersDeletePayment` / `projectsDeletePayment`, see `payments.md`). Create a new checkout rather than reusing the client secret.
 
 ## Future start
 
