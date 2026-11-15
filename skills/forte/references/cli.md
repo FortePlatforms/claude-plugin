@@ -184,10 +184,12 @@ forte websites connections <list|add|update|remove> [projectId] [websiteId] [...
 **Custom domains** (`forte websites domains ...`):
 ```
 forte websites domains list   [projectId] [websiteId]
-forte websites domains add    [projectId] [websiteId] [domain] | [--domain <domain>]
+forte websites domains add    [projectId] [websiteId] [domain] | [--domain <domain>] [--no-www]
 forte websites domains sync   [projectId] [websiteId] [customDomainId]   # advance DNS/cert verification
 forte websites domains remove [projectId] [websiteId] [customDomainId] [--yes]
 ```
+
+Adding a **root domain** (`example.com`) also connects **`www.example.com`** to the same website, as a second custom domain; pass `--no-www` to skip it. `www` is part of the same domain, so there is nothing more to buy or register: it only needs its own connection. Never tell a user `www` is "a separate domain" to get. If the installed CLI predates this (it prints a hint instead of connecting `www`), run `domains add` again with `www.<domain>`.
 
 **Deployment history** (`forte websites deployments ...`):
 ```
