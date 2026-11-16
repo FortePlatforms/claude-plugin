@@ -114,6 +114,12 @@ Registered is not the same as resolving. After the purchase completes:
   issues the certificate. Connecting the website right after buying is fine; nothing has to be redone.
 - **A resolver that asked too early** can keep answering "no such domain" for up to an hour, so the
   customer's own machine may lag behind the rest of the internet.
+- **A hostname you just connected** (a `www`, any new subdomain) has the same problem on a smaller
+  scale. If anything looked it up before the record existed, that resolver keeps answering "no such
+  domain" for up to 15 minutes, even though Forte wrote the record seconds after you connected it. A
+  custom domain that shows Active with a certificate but doesn't resolve for you is this, not a missing
+  record: don't tell the customer to add a DNS record by hand. Check with a resolver that hasn't asked
+  yet, or wait 15 minutes.
 
 So a domain bought and connected in one sitting **normally starts serving within an hour**. Inside that
 window, missing records, a pending custom domain, or "no such domain" are **expected**. Don't call it a
