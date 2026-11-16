@@ -79,7 +79,38 @@ A subscription with `startTime` isn't on today's charge. The customer enters a c
 
 ## Preview
 
-`createCheckoutPreview` takes the same body minus `paymentMethodId` and is read-only (`POST .../checkouts/preview` on both surfaces). It returns the first charge (`subtotalCents`, `taxCents`, `amountCents`, `lineItems`, excluding future-dated subscriptions) and a `subscriptions` list with each renewal's `interval`, totals, `lineItems`, `startTime`, and `nextRenewalAt`. Use it for "Due today: $X. Then $49.00 per month." Renewal figures are estimates, because each renewal recalculates tax. `taxCents` is `null` with no address.
+`createCheckoutPreview` takes the same body minus `paymentMethodId` and is read-only (`POST .../checkouts/preview` on both surfaces). It returns the first charge (`subtotalCents`, `taxCents`, `amountCents`, `lineItems`, excluding future-dated subscriptions) and a `subscriptions` list with each renewal's `interval`, totals, `lineItems`, `startTime`, and `nextRenewalAt`. Use it for "Due today: $X. Then $49.00 per month." Renewal figures are estimates, because each renewal recalculates tax. `taxCents` is `null` with no address. The response also carries `stripePublishableKey` and `stripeConnectedAccountId`.
+
+## Guest preview (no user yet)
+
+Every route above needs a user. To price a checkout for a visitor who hasn't signed up, call `forte.projects.createGuestCheckoutPreview({ projectId, createCheckoutPreviewRequest })` (`POST /api/v1/projects/{projectId}/users/guest/checkouts/preview`). It takes the same body and returns the same response as `createCheckoutPreview`. It is server-side only (API key), so call it from the backend and never from the browser.
+
+- It is a quote and saves nothing. There is no ID to hand to `createCheckout`. When the visitor places the order, create the user, then call `createCheckout` with the same lines and addresses.
+- Tax is only calculated once `customerAddress` is sent. On a cart page, preview without an address: you get `subtotalCents` and `taxCents: null`, so show "Tax calculated at checkout". On the checkout page, preview again with the complete address to get `taxCents` and the full `amountCents`. Don't send a half-typed address.
+- It is rate limited per project: a `429` with `CHECKOUT_PREVIEW_RATE_LIMITED`. Debounce calls made on every cart or address change.
+- Don't invent a placeholder user to get a preview. Use this route.
+
+To show the card form before the account exists, mount Stripe's Payment Element without a client secret, using the preview:
+
+```typescript
+const stripe = await loadStripe(preview.stripePublishableKey, { stripeAccount: preview.stripeConnectedAccountId });
+const savesCard = preview.subscriptions.length > 0;
+const elements =
+  preview.amountCents > 0
+    ? stripe.elements({
+        mode: "payment",
+        amount: preview.amountCents,
+        currency: preview.currency,
+        paymentMethodTypes: ["card"],
+        ...(savesCard ? { setupFutureUsage: "off_session" } : {}),
+      })
+    : stripe.elements({ mode: "setup", currency: preview.currency, paymentMethodTypes: ["card"] });
+```
+
+- `amountCents` of `0` means nothing is due today: use `mode: "setup"` and later `confirmSetup`.
+- A non-empty `subscriptions` list means the card is saved for renewals: set `setupFutureUsage: "off_session"`.
+- A checkout is always card only.
+- On order: `elements.submit()` (validates, charges nothing), create the user, call `createCheckout`, then `stripe.confirmPayment({ elements, clientSecret, confirmParams })` or `confirmSetup`. Call `elements.update({ amount })` whenever a new preview changes the total.
 
 ## Renewals
 

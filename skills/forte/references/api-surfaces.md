@@ -80,7 +80,7 @@ project-owner path your backend calls on their behalf.
 | Payments | `createPayment` | `createPayment` (takes `userId`) |
 | Payment previews | `createPaymentPreview` | `createPaymentPreview` (takes `userId`) |
 | Subscriptions | `createSubscription` | `createSubscription` (takes `userId`) |
-| Checkouts | `createCheckout`, `createCheckoutPreview` | `createCheckout`, `createCheckoutPreview` (take `userId`) |
+| Checkouts | `createCheckout`, `createCheckoutPreview` | `createCheckout`, `createCheckoutPreview` (take `userId`); `createGuestCheckoutPreview` (no user) |
 | Contact methods | self-service add / verify / delete | admin add, override, mark verified without code |
 | Cancelling an unconfirmed payment | `usersDeletePayment` | `projectsDeletePayment` (takes `userId`) |
 | Refunds | — (no client-side route) | `refundPayment` |
