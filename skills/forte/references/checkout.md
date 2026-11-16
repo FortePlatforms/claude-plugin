@@ -89,6 +89,7 @@ Every route above needs a user. To price a checkout for a visitor who hasn't sig
 - Tax is only calculated once `customerAddress` is sent. On a cart page, preview without an address: you get `subtotalCents` and `taxCents: null`, so show "Tax calculated at checkout". On the checkout page, preview again with the complete address to get `taxCents` and the full `amountCents`. Don't send a half-typed address.
 - It is rate limited per project: a `429` with `CHECKOUT_PREVIEW_RATE_LIMITED`. Debounce calls made on every cart or address change.
 - Don't invent a placeholder user to get a preview. Use this route.
+- A user session with no verified contact method (the short session `registerUser` returns before the code is entered) can't create a payment, subscription, or checkout: `400` with `USER_NO_VERIFIED_CONTACT_METHODS`. API-key calls aren't checked, so the backend decides when to charge.
 
 To show the card form before the account exists, mount Stripe's Payment Element without a client secret, using the preview:
 
